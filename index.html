@@ -35,74 +35,38 @@ const canvas  = document.getElementById('c');
 const ctx     = canvas.getContext('2d');
 const labelEl = document.getElementById('label');
 
-const TENSION  = 8;
-const MARGIN   = 10;
-const P        = 10;
-const N        = 10;
-const COVERAGE = 0.5625;
+const TENSION         = 8;
+const MARGIN          = 10;
+const P               = 10;     // skeleton points per blob
+const COVERAGE        = 0.5625;
+const TEX             = 600;
+const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
+const FADE_DURATION   = 1000;   // ms for each blob's fade-in
+const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
+const R_NOISE_AMP     = 0.55;   // radial wiggle amplitude
+const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
+const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
+
+const projects = [
+  { title: 'Alpha Beta Gamma',     url: '#' },
+  { title: 'Delta Echo Foxtrot',   url: '#' },
+  { title: 'Golf Hotel India',     url: '#' },
+  { title: 'Juliet Kilo Lima',     url: '#' },
+  { title: 'Mike November Oscar',  url: '#' },
+  { title: 'Papa Quebec Romeo',    url: '#' },
+  { title: 'Sierra Tango Uniform', url: '#' },
+  { title: 'Victor Whiskey Xray',  url: '#' },
+  { title: 'Yankee Zulu Alpha',    url: '#' },
+  { title: 'Bravo Charlie Delta',  url: '#' },
+];
+
+const N = projects.length;
 
 let W, H;
 
 function computeBaseR() {
   return Math.sqrt(COVERAGE * W * H / (N * Math.PI));
 }
-
-const projects = [
-  { title: 'Alpha Beta Gamma',    url: '#' },
-  { title: 'Delta Echo Foxtrot',  url: '#' },
-  { title: 'Golf Hotel India',    url: '#' },
-  { title: 'Juliet Kilo Lima',    url: '#' },
-  { title: 'Mike November Oscar', url: '#' },
-  { title: 'Papa Quebec Romeo',   url: '#' },
-  { title: 'Sierra Tango Uniform',url: '#' },
-  { title: 'Victor Whiskey Xray', url: '#' },
-  { title: 'Yankee Zulu Alpha',   url: '#' },
-  { title: 'Bravo Charlie Delta', url: '#' },
-];
-
-const TEX = 600;
-
-const textureReady     = new Array(N).fill(false);
-const textureFadeStart = new Array(N).fill(0);
-
-const _img = new Image();
-_img.onload = () => {
-  // Draw screenshot into every texture canvas up front
-  const s = Math.min(_img.width, _img.height);
-  const sx = (_img.width  - s) / 2;
-  const sy = (_img.height - s) / 2;
-  textures.forEach(oc => {
-    oc.getContext('2d').drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
-  });
-
-  // Reveal one blob every 500 ms; reposition if overlapping a visible blob
-  for (let step = 0; step < N; step++) {
-    setTimeout(() => {
-      const a = amoebas[step];
-      const pad = a.baseR;
-      let placed = false;
-      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
-        a.x = pad + Math.random() * (W - 2 * pad);
-        a.y = pad + Math.random() * (H - 2 * pad);
-        placed = !amoebas.some(b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2);
-      }
-      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
-        a.x = pad + Math.random() * (W - 2 * pad);
-        a.y = pad + Math.random() * (H - 2 * pad);
-        placed = !amoebas.some(b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 1);
-      }
-      textureReady[step]     = true;
-      textureFadeStart[step] = performance.now();
-    }, step * 500);
-  }
-};
-_img.src = 'screenshot.png';
-
-const textures = projects.map(() => {
-  const oc = document.createElement('canvas');
-  oc.width = oc.height = TEX;
-  return oc;
-});
 
 function sineNoise(phases, t) {
   let v = 0;
@@ -125,6 +89,12 @@ class Amoeba {
     this.index  = index;
     this.baseR  = computeBaseR();
     this.frozen = false;
+    this.ready  = false;
+    this.fadeStart = 0;
+
+    const oc = document.createElement('canvas');
+    oc.width = oc.height = TEX;
+    this.texture = oc;
 
     const pad = this.baseR;
     this.x = pad + Math.random() * (W - 2 * pad);
@@ -138,9 +108,9 @@ class Amoeba {
 
     this.age = Math.random() * 200;
 
-    this.rPhases    = Array.from({ length: P }, () => makePhases(4, 0.55));
-    this.aPhases    = Array.from({ length: P }, () => makePhases(2, 0.12));
-    this.turnPhases = makePhases(3, 0.45);
+    this.rPhases    = Array.from({ length: P }, () => makePhases(4, R_NOISE_AMP));
+    this.aPhases    = Array.from({ length: P }, () => makePhases(2, A_NOISE_AMP));
+    this.turnPhases = makePhases(3, TURN_NOISE_AMP);
 
     this._pts = Array.from({ length: P }, () => [0, 0]);
   }
@@ -161,17 +131,17 @@ class Amoeba {
     this.x += this.vx * dt;
     this.y += this.vy * dt;
 
-    const r = this.baseR * 0.3;
-    if (this.x < r         && this.vx < 0) { this.vx =  Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.x > W - r     && this.vx > 0) { this.vx = -Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.y < r         && this.vy < 0) { this.vy =  Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.y > H - r     && this.vy > 0) { this.vy = -Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
+    const wallR = this.baseR * 0.3;
+    if (this.x < wallR     && this.vx < 0) { this.vx =  Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
+    if (this.x > W - wallR && this.vx > 0) { this.vx = -Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
+    if (this.y < wallR     && this.vy < 0) { this.vy =  Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
+    if (this.y > H - wallR && this.vy > 0) { this.vy = -Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
 
     const spd = Math.hypot(this.vx, this.vy);
     if (spd > 0) { this.vx = (this.vx / spd) * this.speed; this.vy = (this.vy / spd) * this.speed; }
 
-    this.x = Math.max(r, Math.min(W - r, this.x));
-    this.y = Math.max(r, Math.min(H - r, this.y));
+    this.x = Math.max(wallR, Math.min(W - wallR, this.x));
+    this.y = Math.max(wallR, Math.min(H - wallR, this.y));
   }
 
   buildPoints(t) {
@@ -183,9 +153,9 @@ class Amoeba {
     }
   }
 
-  // Trace the blob outline onto any 2D context (no allocation)
+  // Trace the blob bezier outline onto c. Caller must call beginPath() first
+  // (Path2D lacks beginPath, so keeping it separate lets buildPath2D reuse this).
   _trace(c) {
-    c.beginPath();
     for (let i = 0; i < P; i++) {
       const p0 = this._pts[(i - 1 + P) % P], p1 = this._pts[i];
       const p2 = this._pts[(i + 1) % P],     p3 = this._pts[(i + 2) % P];
@@ -200,39 +170,30 @@ class Amoeba {
   }
 
   // Build a Path2D on demand — only called on tap, not per frame
-  // (can't reuse _trace: Path2D has no beginPath)
   buildPath2D() {
     const path = new Path2D();
-    for (let i = 0; i < P; i++) {
-      const p0 = this._pts[(i - 1 + P) % P], p1 = this._pts[i];
-      const p2 = this._pts[(i + 1) % P],     p3 = this._pts[(i + 2) % P];
-      if (i === 0) path.moveTo(p1[0], p1[1]);
-      path.bezierCurveTo(
-        p1[0] + (p2[0] - p0[0]) / TENSION, p1[1] + (p2[1] - p0[1]) / TENSION,
-        p2[0] - (p3[0] - p1[0]) / TENSION, p2[1] - (p3[1] - p1[1]) / TENSION,
-        p2[0], p2[1],
-      );
-    }
-    path.closePath();
+    this._trace(path);
     return path;
   }
 
   draw(isSelected) {
-    if (!textureReady[this.index]) return;
+    if (!this.ready) return;
 
-    const alpha = Math.min(1, (performance.now() - textureFadeStart[this.index]) / 1000);
-    const s     = this.baseR * 3.2;
+    const alpha = Math.min(1, (performance.now() - this.fadeStart) / FADE_DURATION);
+    const s     = this.baseR * TEXTURE_SCALE;
 
     ctx.save();
     ctx.globalAlpha = alpha;
+    ctx.beginPath();
     this._trace(ctx);
     ctx.clip();
-    ctx.drawImage(textures[this.index], this.x - s / 2, this.y - s / 2, s, s);
+    ctx.drawImage(this.texture, this.x - s / 2, this.y - s / 2, s, s);
     ctx.restore();
 
     if (isSelected) {
       ctx.save();
       ctx.globalAlpha = alpha;
+      ctx.beginPath();
       this._trace(ctx);
       ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
       ctx.shadowBlur  = 28;
@@ -266,8 +227,39 @@ window.addEventListener('resize', () => {
   if (selectedAmoeba) positionLabel(selectedAmoeba);
 });
 
+const amoebas = projects.map((_, i) => new Amoeba(i));
 
-const amoebas = Array.from({ length: N }, (_, i) => new Amoeba(i));
+const _img = new Image();
+_img.onload = () => {
+  const s = Math.min(_img.width, _img.height);
+  const sx = (_img.width  - s) / 2;
+  const sy = (_img.height - s) / 2;
+  for (const a of amoebas) {
+    a.texture.getContext('2d').drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
+  }
+
+  // Reveal one blob every REVEAL_INTERVAL ms; reposition against live blob positions first
+  amoebas.forEach((_, step) => {
+    setTimeout(() => {
+      const a = amoebas[step];
+      const pad = a.baseR;
+      let placed = false;
+      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
+        a.x = pad + Math.random() * (W - 2 * pad);
+        a.y = pad + Math.random() * (H - 2 * pad);
+        placed = !amoebas.some(b => b.ready && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2);
+      }
+      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
+        a.x = pad + Math.random() * (W - 2 * pad);
+        a.y = pad + Math.random() * (H - 2 * pad);
+        placed = !amoebas.some(b => b.ready && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR);
+      }
+      a.ready     = true;
+      a.fadeStart = performance.now();
+    }, step * REVEAL_INTERVAL);
+  });
+};
+_img.src = 'screenshot.png';
 
 let selectedAmoeba = null;
 
@@ -303,7 +295,7 @@ canvas.addEventListener('pointerdown', e => {
   tapDownX = e.clientX; tapDownY = e.clientY;
   tapTarget = null;
   for (const a of amoebas) {
-    if (!textureReady[a.index]) continue;
+    if (!a.ready) continue;
     if (ctx.isPointInPath(a.buildPath2D(), e.clientX * DPR, e.clientY * DPR)) {
       if (!tapTarget || a.baseR < tapTarget.baseR) tapTarget = a;
     }
