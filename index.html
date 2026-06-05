@@ -39,7 +39,7 @@ const TENSION  = 8;
 const MARGIN   = 10;
 const P        = 10;
 const N        = 10;
-const COVERAGE = 0.45;
+const COVERAGE = 0.5625;
 
 let W, H;
 
@@ -61,7 +61,7 @@ const projects = [
 ];
 
 // Offscreen textures — photo only, no text baked in
-const TEX = Math.round(600 * (window.devicePixelRatio || 1));
+const TEX = 600;
 
 const textureReady     = new Array(N).fill(false);
 const textureFadeStart = new Array(N).fill(0);
@@ -198,12 +198,23 @@ class Amoeba {
   }
 }
 
-W = canvas.width  = window.innerWidth;
-H = canvas.height = window.innerHeight;
+// Cap at 2× to keep render cost reasonable on 3× phones
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width        = Math.round(W * DPR);
+  canvas.height       = Math.round(H * DPR);
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); // absolute set — never accumulates
+}
+
+resize();
 
 window.addEventListener('resize', () => {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+  resize();
   const r = computeBaseR();
   for (const a of amoebas) a.baseR = r;
   if (selectedAmoeba) positionLabel(selectedAmoeba);
@@ -246,7 +257,7 @@ canvas.addEventListener('pointerdown', e => {
   tapTarget = null;
   for (const a of amoebas) {
     if (!textureReady[a.index]) continue;
-    if (ctx.isPointInPath(a._path, e.clientX, e.clientY)) {
+    if (ctx.isPointInPath(a._path, e.clientX * DPR, e.clientY * DPR)) {
       if (!tapTarget || a.baseR < tapTarget.baseR) tapTarget = a;
     }
   }
