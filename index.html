@@ -60,23 +60,29 @@ const projects = [
   { title: 'Bravo Charlie Delta', url: '#' },
 ];
 
-// Offscreen textures — photo only, no text baked in
 const TEX = 600;
 
 const textureReady     = new Array(N).fill(false);
 const textureFadeStart = new Array(N).fill(0);
 
-const textures = projects.map((_, i) => {
-  const oc = document.createElement('canvas');
-  oc.width = oc.height = TEX;
-  const octx = oc.getContext('2d');
-  const img = new Image();
-  img.onload = () => {
-    octx.drawImage(img, 0, 0, TEX, TEX);
+const _img = new Image();
+_img.onload = () => {
+  textures.forEach((oc, i) => {
+    const octx = oc.getContext('2d');
+    // centre-crop the screenshot into the square texture
+    const s = Math.min(_img.width, _img.height);
+    const sx = (_img.width  - s) / 2;
+    const sy = (_img.height - s) / 2;
+    octx.drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
     textureReady[i]     = true;
     textureFadeStart[i] = performance.now();
-  };
-  img.src = `https://picsum.photos/seed/${(i + 1) * 11}/600/600`;
+  });
+};
+_img.src = 'screenshot.png';
+
+const textures = projects.map(() => {
+  const oc = document.createElement('canvas');
+  oc.width = oc.height = TEX;
   return oc;
 });
 
