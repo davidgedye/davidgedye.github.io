@@ -102,8 +102,17 @@ class Amoeba {
     this.baseR  = computeBaseR();
     this.frozen = false;
 
-    this.x = this.baseR + Math.random() * (W - 2 * this.baseR);
-    this.y = this.baseR + Math.random() * (H - 2 * this.baseR);
+    const pad = this.baseR;
+    let x, y;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      x = pad + Math.random() * (W - 2 * pad);
+      y = pad + Math.random() * (H - 2 * pad);
+      const tooClose = _placedPositions.some(p => Math.hypot(x - p.x, y - p.y) < this.baseR * 2);
+      if (!tooClose || attempt === 4) break;
+    }
+    this.x = x;
+    this.y = y;
+    _placedPositions.push({ x, y });
 
     this._baseSpeed = Math.max(W, H) / (120 + Math.random() * 80);
     this.speed = this._baseSpeed;
@@ -117,8 +126,7 @@ class Amoeba {
     this.aPhases    = Array.from({ length: P }, () => makePhases(2, 0.12));
     this.turnPhases = makePhases(3, 0.45);
 
-    this._pts  = Array.from({ length: P }, () => [0, 0]);
-    this._path = null;
+    this._pts = Array.from({ length: P }, () => [0, 0]);
   }
 
   update(dt) {
@@ -157,42 +165,53 @@ class Amoeba {
       this._pts[i][0] = Math.max(MARGIN, Math.min(W - MARGIN, this.x + Math.cos(angle) * r));
       this._pts[i][1] = Math.max(MARGIN, Math.min(H - MARGIN, this.y + Math.sin(angle) * r));
     }
+  }
 
-    const path = new Path2D();
+  // Trace the blob outline onto any 2D context (no allocation)
+  _trace(c) {
+    c.beginPath();
     for (let i = 0; i < P; i++) {
       const p0 = this._pts[(i - 1 + P) % P], p1 = this._pts[i];
       const p2 = this._pts[(i + 1) % P],     p3 = this._pts[(i + 2) % P];
-      if (i === 0) path.moveTo(p1[0], p1[1]);
-      path.bezierCurveTo(
+      if (i === 0) c.moveTo(p1[0], p1[1]);
+      c.bezierCurveTo(
         p1[0] + (p2[0] - p0[0]) / TENSION, p1[1] + (p2[1] - p0[1]) / TENSION,
         p2[0] - (p3[0] - p1[0]) / TENSION, p2[1] - (p3[1] - p1[1]) / TENSION,
         p2[0], p2[1],
       );
     }
-    path.closePath();
-    this._path = path;
+    c.closePath();
+  }
+
+  // Build a Path2D on demand — only called on tap, not per frame
+  buildPath2D() {
+    const path = new Path2D();
+    this._trace(path);
+    return path;
   }
 
   draw(isSelected) {
     if (!textureReady[this.index]) return;
 
     const alpha = Math.min(1, (performance.now() - textureFadeStart[this.index]) / 1000);
+    const s     = this.baseR * 3.2;
 
     ctx.save();
     ctx.globalAlpha = alpha;
-    ctx.clip(this._path);
-    const s = this.baseR * 3.2;
+    this._trace(ctx);
+    ctx.clip();
     ctx.drawImage(textures[this.index], this.x - s / 2, this.y - s / 2, s, s);
     ctx.restore();
 
     if (isSelected) {
       ctx.save();
       ctx.globalAlpha = alpha;
+      this._trace(ctx);
       ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
       ctx.shadowBlur  = 28;
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
       ctx.lineWidth   = 3;
-      ctx.stroke(this._path);
+      ctx.stroke();
       ctx.restore();
     }
   }
@@ -220,6 +239,7 @@ window.addEventListener('resize', () => {
   if (selectedAmoeba) positionLabel(selectedAmoeba);
 });
 
+const _placedPositions = [];
 const amoebas = Array.from({ length: N }, (_, i) => new Amoeba(i));
 
 let selectedAmoeba = null;
@@ -257,7 +277,7 @@ canvas.addEventListener('pointerdown', e => {
   tapTarget = null;
   for (const a of amoebas) {
     if (!textureReady[a.index]) continue;
-    if (ctx.isPointInPath(a._path, e.clientX * DPR, e.clientY * DPR)) {
+    if (ctx.isPointInPath(a.buildPath2D(), e.clientX * DPR, e.clientY * DPR)) {
       if (!tapTarget || a.baseR < tapTarget.baseR) tapTarget = a;
     }
   }
