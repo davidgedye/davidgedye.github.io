@@ -32,22 +32,42 @@ function computeBaseR() {
 
 // Stub project data — fill in real titles/URLs later
 const projects = [
-  { title: 'Project A', url: '#' },
-  { title: 'Project B', url: '#' },
-  { title: 'Project C', url: '#' },
-  { title: 'Project D', url: '#' },
-  { title: 'Project E', url: '#' },
-  { title: 'Project F', url: '#' },
-  { title: 'Project G', url: '#' },
-  { title: 'Project H', url: '#' },
-  { title: 'Project I', url: '#' },
-  { title: 'Project J', url: '#' },
+  { title: 'Alpha Beta Gamma', url: '#' },
+  { title: 'Delta Echo Foxtrot', url: '#' },
+  { title: 'Golf Hotel India', url: '#' },
+  { title: 'Juliet Kilo Lima', url: '#' },
+  { title: 'Mike November Oscar', url: '#' },
+  { title: 'Papa Quebec Romeo', url: '#' },
+  { title: 'Sierra Tango Uniform', url: '#' },
+  { title: 'Victor Whiskey Xray', url: '#' },
+  { title: 'Yankee Zulu Alpha', url: '#' },
+  { title: 'Bravo Charlie Delta', url: '#' },
 ];
 
-const images = projects.map((_, i) => {
+const TEX = 600; // offscreen canvas size
+// Font size that will appear as ~10% of baseR on screen (TEX / (baseR*3.2) * baseR*0.10 = TEX*0.10/3.2)
+const LABEL_PX = Math.round(TEX * 0.10 / 3.2);
+
+const textures = projects.map((p, i) => {
+  const oc = document.createElement('canvas');
+  oc.width = oc.height = TEX;
+  const octx = oc.getContext('2d');
+  octx.fillStyle = `hsl(${i * 36}, 55%, 35%)`;
+  octx.fillRect(0, 0, TEX, TEX);
   const img = new Image();
+  img.onload = () => {
+    octx.clearRect(0, 0, TEX, TEX);
+    octx.drawImage(img, 0, 0, TEX, TEX);
+    octx.font = `${LABEL_PX}px system-ui, sans-serif`;
+    octx.textAlign = 'center';
+    octx.textBaseline = 'middle';
+    octx.fillStyle = 'rgba(0,0,0,0.55)';
+    octx.fillText(p.title, TEX/2 + 1, TEX/2 + 1);
+    octx.fillStyle = 'rgba(255,255,255,0.95)';
+    octx.fillText(p.title, TEX/2, TEX/2);
+  };
   img.src = `https://picsum.photos/seed/${(i + 1) * 11}/600/600`;
-  return img;
+  return oc;
 });
 
 function sineNoise(phases, t) {
@@ -143,18 +163,10 @@ class Amoeba {
   }
 
   draw(isHovered) {
-    const img = images[this.index];
-
-    // Fill: image clipped to blob shape, or fallback hue while loading
     ctx.save();
     ctx.clip(this._path);
-    if (img.complete && img.naturalWidth > 0) {
-      const s = this.baseR * 3.2;
-      ctx.drawImage(img, this.x - s / 2, this.y - s / 2, s, s);
-    } else {
-      ctx.fillStyle = `hsl(${this.index * 36}, 55%, 35%)`;
-      ctx.fill(this._path);
-    }
+    const s = this.baseR * 3.2;
+    ctx.drawImage(textures[this.index], this.x - s / 2, this.y - s / 2, s, s);
     ctx.restore();
 
     // Outline / hover glow
@@ -260,6 +272,10 @@ function frame(ts) {
 
   ctx.clearRect(0, 0, W, H);
 
+  // Update positions first, then override drag, then build paths —
+  // ensures image (drawn at this.x/y) and label (drawn at labelX/labelY) use identical coordinates
+  for (const a of amoebas) a.update(dt);
+
   if (dragTarget) {
     dragTarget.x = dragMx + dragOffsetX;
     dragTarget.y = dragMy + dragOffsetY;
@@ -273,8 +289,6 @@ function frame(ts) {
     if (ctx.isPointInPath(a._path, mouseX, mouseY)) hoveredAmoeba = a;
   }
   canvas.style.cursor = hoveredAmoeba ? 'pointer' : 'default';
-
-  for (const a of amoebas) a.update(dt);
 
   // Draw hovered amoeba last so its glow renders on top
   for (const a of amoebas) {
