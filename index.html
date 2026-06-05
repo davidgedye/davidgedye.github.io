@@ -67,16 +67,31 @@ const textureFadeStart = new Array(N).fill(0);
 
 const _img = new Image();
 _img.onload = () => {
-  textures.forEach((oc, i) => {
-    const octx = oc.getContext('2d');
-    // centre-crop the screenshot into the square texture
-    const s = Math.min(_img.width, _img.height);
-    const sx = (_img.width  - s) / 2;
-    const sy = (_img.height - s) / 2;
-    octx.drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
-    textureReady[i]     = true;
-    textureFadeStart[i] = performance.now();
+  // Draw screenshot into every texture canvas up front
+  const s = Math.min(_img.width, _img.height);
+  const sx = (_img.width  - s) / 2;
+  const sy = (_img.height - s) / 2;
+  textures.forEach(oc => {
+    oc.getContext('2d').drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
   });
+
+  // Reveal one blob every 500 ms; reposition if overlapping a visible blob
+  for (let step = 0; step < N; step++) {
+    setTimeout(() => {
+      const a = amoebas[step];
+      const pad = a.baseR;
+      for (let attempt = 0; attempt < 8; attempt++) {
+        const tooClose = amoebas.some(
+          b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2
+        );
+        if (!tooClose) break;
+        a.x = pad + Math.random() * (W - 2 * pad);
+        a.y = pad + Math.random() * (H - 2 * pad);
+      }
+      textureReady[step]     = true;
+      textureFadeStart[step] = performance.now();
+    }, step * 500);
+  }
 };
 _img.src = 'screenshot.png';
 
@@ -190,9 +205,20 @@ class Amoeba {
   }
 
   // Build a Path2D on demand — only called on tap, not per frame
+  // (can't reuse _trace: Path2D has no beginPath)
   buildPath2D() {
     const path = new Path2D();
-    this._trace(path);
+    for (let i = 0; i < P; i++) {
+      const p0 = this._pts[(i - 1 + P) % P], p1 = this._pts[i];
+      const p2 = this._pts[(i + 1) % P],     p3 = this._pts[(i + 2) % P];
+      if (i === 0) path.moveTo(p1[0], p1[1]);
+      path.bezierCurveTo(
+        p1[0] + (p2[0] - p0[0]) / TENSION, p1[1] + (p2[1] - p0[1]) / TENSION,
+        p2[0] - (p3[0] - p1[0]) / TENSION, p2[1] - (p3[1] - p1[1]) / TENSION,
+        p2[0], p2[1],
+      );
+    }
+    path.closePath();
     return path;
   }
 
