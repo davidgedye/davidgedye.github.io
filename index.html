@@ -80,13 +80,16 @@ _img.onload = () => {
     setTimeout(() => {
       const a = amoebas[step];
       const pad = a.baseR;
-      for (let attempt = 0; attempt < 8; attempt++) {
-        const tooClose = amoebas.some(
-          b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2
-        );
-        if (!tooClose) break;
+      let placed = false;
+      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
         a.x = pad + Math.random() * (W - 2 * pad);
         a.y = pad + Math.random() * (H - 2 * pad);
+        placed = !amoebas.some(b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2);
+      }
+      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
+        a.x = pad + Math.random() * (W - 2 * pad);
+        a.y = pad + Math.random() * (H - 2 * pad);
+        placed = !amoebas.some(b => textureReady[b.index] && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 1);
       }
       textureReady[step]     = true;
       textureFadeStart[step] = performance.now();
@@ -124,16 +127,8 @@ class Amoeba {
     this.frozen = false;
 
     const pad = this.baseR;
-    let x, y;
-    for (let attempt = 0; attempt < 5; attempt++) {
-      x = pad + Math.random() * (W - 2 * pad);
-      y = pad + Math.random() * (H - 2 * pad);
-      const tooClose = _placedPositions.some(p => Math.hypot(x - p.x, y - p.y) < this.baseR * 2);
-      if (!tooClose || attempt === 4) break;
-    }
-    this.x = x;
-    this.y = y;
-    _placedPositions.push({ x, y });
+    this.x = pad + Math.random() * (W - 2 * pad);
+    this.y = pad + Math.random() * (H - 2 * pad);
 
     this._baseSpeed = Math.max(W, H) / (120 + Math.random() * 80);
     this.speed = this._baseSpeed;
@@ -271,7 +266,7 @@ window.addEventListener('resize', () => {
   if (selectedAmoeba) positionLabel(selectedAmoeba);
 });
 
-const _placedPositions = [];
+
 const amoebas = Array.from({ length: N }, (_, i) => new Amoeba(i));
 
 let selectedAmoeba = null;
