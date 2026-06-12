@@ -26,7 +26,7 @@ const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
 const R_NOISE_AMP     = 0.55;   // radial wiggle amplitude
 const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
-const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
+const TURN_NOISE_AMP  = 0.35;   // heading drift amplitude
 const MORPH_DURATION  = 1.5;    // seconds to morph open/closed
 
 const projects = [
@@ -200,21 +200,18 @@ class Amoeba {
   // 16 target rectangle points, clockwise from right, matching blob winding order.
   // Side order: right → bottom → left → top; 4 points per side at 20/40/60/80% of each side.
   _computeTargetPts() {
-    const imgW_css = this.imgW / DPR;
-    const imgH_css = this.imgH / DPR;
-    const sc = Math.min(W * 0.85 / imgW_css, H * 0.85 / imgH_css);
-    const hw = imgW_css * sc / 2;
-    const hh = imgH_css * sc / 2;
+    const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2;
+    const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2;
     const cx = this.x, cy = this.y;
     return [
-      [cx + hw, cy - hh * 0.6], [cx + hw, cy - hh * 0.2], // right side, top half
-      [cx + hw, cy + hh * 0.2], [cx + hw, cy + hh * 0.6], // right side, bottom half
-      [cx + hw * 0.6, cy + hh], [cx + hw * 0.2, cy + hh], // bottom, right half
-      [cx - hw * 0.2, cy + hh], [cx - hw * 0.6, cy + hh], // bottom, left half
-      [cx - hw, cy + hh * 0.6], [cx - hw, cy + hh * 0.2], // left side, bottom half
-      [cx - hw, cy - hh * 0.2], [cx - hw, cy - hh * 0.6], // left side, top half
-      [cx - hw * 0.6, cy - hh], [cx - hw * 0.2, cy - hh], // top, left half
-      [cx + hw * 0.2, cy - hh], [cx + hw * 0.6, cy - hh], // top, right half
+      [cx + hw, cy - hh * 0.82], [cx + hw, cy - hh * 0.35], // right side, top half
+      [cx + hw, cy + hh * 0.35], [cx + hw, cy + hh * 0.82], // right side, bottom half
+      [cx + hw * 0.82, cy + hh], [cx + hw * 0.35, cy + hh], // bottom, right half
+      [cx - hw * 0.35, cy + hh], [cx - hw * 0.82, cy + hh], // bottom, left half
+      [cx - hw, cy + hh * 0.82], [cx - hw, cy + hh * 0.35], // left side, bottom half
+      [cx - hw, cy - hh * 0.35], [cx - hw, cy - hh * 0.82], // left side, top half
+      [cx - hw * 0.82, cy - hh], [cx - hw * 0.35, cy - hh], // top, left half
+      [cx + hw * 0.35, cy - hh], [cx + hw * 0.82, cy - hh], // top, right half
     ];
   }
 
@@ -245,17 +242,9 @@ class Amoeba {
     if (!this.ready) return;
 
     const alpha = Math.min(1, (performance.now() - this.fadeStart) / FADE_DURATION);
-    const ease  = morphEase(this.morphT);
 
-    const blobW = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect);
-    const blobH = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect);
-    const imgW_css = this.imgW / DPR;
-    const imgH_css = this.imgH / DPR;
-    const sc    = Math.min(W * 0.85 / imgW_css, H * 0.85 / imgH_css);
-    const openW = imgW_css * sc;
-    const openH = imgH_css * sc;
-    const drawW = blobW + (openW - blobW) * ease;
-    const drawH = blobH + (openH - blobH) * ease;
+    const drawW = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect);
+    const drawH = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect);
 
     ctx.save();
     ctx.globalAlpha = alpha;
