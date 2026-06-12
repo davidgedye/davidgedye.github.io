@@ -20,7 +20,7 @@ const ctx    = canvas.getContext('2d');
 const TENSION         = 8;
 const MARGIN          = 10;
 const P               = 16;     // skeleton points per blob (4 per rectangle side)
-const COVERAGE        = 0.5625;
+const COVERAGE        = 0.3;
 const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
 const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
@@ -329,7 +329,10 @@ amoebas.forEach((a, step) => {
     const cap = Math.sqrt(img.naturalWidth * img.naturalHeight) / (TEXTURE_SCALE * DPR);
     if (cap < _baseRMax) {
       _baseRMax = cap;
-      for (const b of amoebas) b.baseR = computeBaseR();
+      // Only update blobs not yet revealed — changing baseR on a visible blob causes a jump
+      for (const b of amoebas) {
+        if (!b.ready) b.baseR = computeBaseR();
+      }
     }
 
     if (_staggerOrigin === null) _staggerOrigin = performance.now();
