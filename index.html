@@ -39,7 +39,6 @@ const TENSION         = 8;
 const MARGIN          = 10;
 const P               = 10;     // skeleton points per blob
 const COVERAGE        = 0.5625;
-const TEX             = 600;
 const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
 const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
@@ -48,24 +47,40 @@ const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
 const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
 
 const projects = [
-  { title: 'Alpha Beta Gamma',     url: '#' },
-  { title: 'Delta Echo Foxtrot',   url: '#' },
-  { title: 'Golf Hotel India',     url: '#' },
-  { title: 'Juliet Kilo Lima',     url: '#' },
-  { title: 'Mike November Oscar',  url: '#' },
-  { title: 'Papa Quebec Romeo',    url: '#' },
-  { title: 'Sierra Tango Uniform', url: '#' },
-  { title: 'Victor Whiskey Xray',  url: '#' },
-  { title: 'Yankee Zulu Alpha',    url: '#' },
-  { title: 'Bravo Charlie Delta',  url: '#' },
+  { title: 'Amoeba',         src: 'images/amoeba.jpeg',        url: '#' },
+  { title: 'Antipodes',      src: 'images/antipodes.jpeg',     url: '#' },
+  { title: 'Boxcraft',       src: 'images/boxcraft.jpeg',      url: '#' },
+  { title: 'Christine Gedye',src: 'images/christinegedye.jpeg',url: '#' },
+  { title: 'Great Circles',  src: 'images/greatcircles.jpeg',  url: '#' },
+  { title: 'Hoyte',          src: 'images/hoyte.jpeg',         url: '#' },
+  { title: 'Montages',       src: 'images/montages.jpeg',      url: '#' },
+  { title: 'Strava',         src: 'images/strava.jpeg',        url: '#' },
+  { title: 'Substack',       src: 'images/substack.jpeg',      url: '#' },
 ];
 
 const N = projects.length;
 
 let W, H;
+let _baseRMax = Infinity; // tightened as images load; caps blob size to avoid upscaling
 
 function computeBaseR() {
-  return Math.sqrt(COVERAGE * W * H / (N * Math.PI));
+  return Math.min(Math.sqrt(COVERAGE * W * H / (N * Math.PI)), _baseRMax);
+}
+
+// Place a within bounds, avoiding overlap with others (5× at 2r, then 5× at 1r)
+function placeBlob(a, others) {
+  const pad = a.baseR;
+  let ok = false;
+  for (let attempt = 0; attempt < 5 && !ok; attempt++) {
+    a.x = pad + Math.random() * (W - 2 * pad);
+    a.y = pad + Math.random() * (H - 2 * pad);
+    ok = !others.some(b => Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2);
+  }
+  for (let attempt = 0; attempt < 5 && !ok; attempt++) {
+    a.x = pad + Math.random() * (W - 2 * pad);
+    a.y = pad + Math.random() * (H - 2 * pad);
+    ok = !others.some(b => Math.hypot(a.x - b.x, a.y - b.y) < a.baseR);
+  }
 }
 
 function sineNoise(phases, t) {
@@ -93,8 +108,7 @@ class Amoeba {
     this.fadeStart = 0;
 
     const oc = document.createElement('canvas');
-    oc.width = oc.height = TEX;
-    this.texture = oc;
+    this.texture = oc; // sized per-image in onload
 
     const pad = this.baseR;
     this.x = pad + Math.random() * (W - 2 * pad);
@@ -132,16 +146,18 @@ class Amoeba {
     this.y += this.vy * dt;
 
     const wallR = this.baseR * 0.3;
-    if (this.x < wallR     && this.vx < 0) { this.vx =  Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.x > W - wallR && this.vx > 0) { this.vx = -Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.y < wallR     && this.vy < 0) { this.vy =  Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
-    if (this.y > H - wallR && this.vy > 0) { this.vy = -Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
+    if (this !== dragTarget) {
+      if (this.x < wallR     && this.vx < 0) { this.vx =  Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
+      if (this.x > W - wallR && this.vx > 0) { this.vx = -Math.abs(this.vx) * (0.9 + Math.random() * 0.2); this.vy += (Math.random() - 0.5) * this.speed * 0.3; }
+      if (this.y < wallR     && this.vy < 0) { this.vy =  Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
+      if (this.y > H - wallR && this.vy > 0) { this.vy = -Math.abs(this.vy) * (0.9 + Math.random() * 0.2); this.vx += (Math.random() - 0.5) * this.speed * 0.3; }
 
-    const spd = Math.hypot(this.vx, this.vy);
-    if (spd > 0) { this.vx = (this.vx / spd) * this.speed; this.vy = (this.vy / spd) * this.speed; }
+      const spd = Math.hypot(this.vx, this.vy);
+      if (spd > 0) { this.vx = (this.vx / spd) * this.speed; this.vy = (this.vy / spd) * this.speed; }
 
-    this.x = Math.max(wallR, Math.min(W - wallR, this.x));
-    this.y = Math.max(wallR, Math.min(H - wallR, this.y));
+      this.x = Math.max(wallR, Math.min(W - wallR, this.x));
+      this.y = Math.max(wallR, Math.min(H - wallR, this.y));
+    }
   }
 
   buildPoints(t) {
@@ -220,46 +236,60 @@ function resize() {
 
 resize();
 
+let _resizeTimer = null;
+
 window.addEventListener('resize', () => {
-  resize();
-  const r = computeBaseR();
-  for (const a of amoebas) a.baseR = r;
-  if (selectedAmoeba) positionLabel(selectedAmoeba);
+  clearTimeout(_resizeTimer);
+  _resizeTimer = setTimeout(() => {
+    resize();
+
+    if (selectedAmoeba) deselect();
+    tapTarget = null; dragTarget = null; dragHistory = [];
+
+    const r = computeBaseR();
+    for (const a of amoebas) a.baseR = r;
+
+    const placed = [];
+    for (const a of amoebas) {
+      if (!a.ready) continue;
+      placeBlob(a, placed);
+      placed.push(a);
+    }
+  }, 150);
 });
 
 const amoebas = projects.map((_, i) => new Amoeba(i));
 
-const _img = new Image();
-_img.onload = () => {
-  const s = Math.min(_img.width, _img.height);
-  const sx = (_img.width  - s) / 2;
-  const sy = (_img.height - s) / 2;
-  for (const a of amoebas) {
-    a.texture.getContext('2d').drawImage(_img, sx, sy, s, s, 0, 0, TEX, TEX);
-  }
+// Load images in parallel; stagger starts as soon as the first image is ready
+let _staggerOrigin = null;
 
-  // Reveal one blob every REVEAL_INTERVAL ms; reposition against live blob positions first
-  amoebas.forEach((_, step) => {
+amoebas.forEach((a, step) => {
+  const img = new Image();
+  img.onload = () => {
+    const s = Math.min(img.width, img.height);
+    const sx = (img.width  - s) / 2;
+    const sy = (img.height - s) / 2;
+    // Size the texture to the image's natural short side — 1:1 physical pixels at max blob size
+    a.texture.width = a.texture.height = s;
+    a.texture.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, s, s);
+
+    // Tighten the global cap and recompute all radii
+    const cap = s / (TEXTURE_SCALE * DPR);
+    if (cap < _baseRMax) {
+      _baseRMax = cap;
+      for (const b of amoebas) b.baseR = computeBaseR();
+    }
+
+    if (_staggerOrigin === null) _staggerOrigin = performance.now();
+    const delay = Math.max(0, _staggerOrigin + step * REVEAL_INTERVAL - performance.now());
     setTimeout(() => {
-      const a = amoebas[step];
-      const pad = a.baseR;
-      let placed = false;
-      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
-        a.x = pad + Math.random() * (W - 2 * pad);
-        a.y = pad + Math.random() * (H - 2 * pad);
-        placed = !amoebas.some(b => b.ready && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR * 2);
-      }
-      for (let attempt = 0; attempt < 5 && !placed; attempt++) {
-        a.x = pad + Math.random() * (W - 2 * pad);
-        a.y = pad + Math.random() * (H - 2 * pad);
-        placed = !amoebas.some(b => b.ready && Math.hypot(a.x - b.x, a.y - b.y) < a.baseR);
-      }
+      placeBlob(a, amoebas.filter(b => b.ready));
       a.ready     = true;
       a.fadeStart = performance.now();
-    }, step * REVEAL_INTERVAL);
-  });
-};
-_img.src = 'screenshot.png';
+    }, delay);
+  };
+  img.src = projects[step].src;
+});
 
 let selectedAmoeba = null;
 
@@ -288,26 +318,45 @@ function deselect() {
   labelEl.style.display = 'none';
 }
 
-let tapTarget = null;
-let tapDownX  = 0, tapDownY = 0;
+let tapTarget   = null;
+let dragTarget  = null;
+let dragMx = 0, dragMy = 0;
+let dragOffsetX = 0, dragOffsetY = 0;
+let dragHistory = [];
+let pointerDownX = 0, pointerDownY = 0;
 
 canvas.addEventListener('pointerdown', e => {
-  tapDownX = e.clientX; tapDownY = e.clientY;
-  tapTarget = null;
+  pointerDownX = e.clientX; pointerDownY = e.clientY;
+  tapTarget = null; dragTarget = null;
   for (const a of amoebas) {
     if (!a.ready) continue;
     if (ctx.isPointInPath(a.buildPath2D(), e.clientX * DPR, e.clientY * DPR)) {
       if (!tapTarget || a.baseR < tapTarget.baseR) tapTarget = a;
     }
   }
+  if (tapTarget) {
+    if (tapTarget.frozen) deselect(); // unfreeze so update() doesn't skip it
+    dragTarget  = tapTarget;
+    dragMx = e.clientX; dragMy = e.clientY;
+    dragOffsetX = dragTarget.x - e.clientX;
+    dragOffsetY = dragTarget.y - e.clientY;
+    dragHistory = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
+  }
   canvas.setPointerCapture(e.pointerId);
   e.preventDefault();
 });
 
-canvas.addEventListener('pointercancel', () => { tapTarget = null; });
+canvas.addEventListener('pointermove', e => {
+  if (!dragTarget) return;
+  dragMx = e.clientX; dragMy = e.clientY;
+  dragHistory.push({ x: dragMx, y: dragMy, t: performance.now() });
+  if (dragHistory.length > 15) dragHistory.shift();
+});
+
+canvas.addEventListener('pointercancel', () => { tapTarget = null; dragTarget = null; dragHistory = []; });
 
 canvas.addEventListener('pointerup', e => {
-  const moved = Math.hypot(e.clientX - tapDownX, e.clientY - tapDownY);
+  const moved = Math.hypot(e.clientX - pointerDownX, e.clientY - pointerDownY);
   if (moved < 12) {
     if (tapTarget && tapTarget !== selectedAmoeba) {
       deselect();
@@ -315,8 +364,23 @@ canvas.addEventListener('pointerup', e => {
     } else {
       deselect();
     }
+  } else if (dragTarget) {
+    const now    = performance.now();
+    const recent = dragHistory.filter(h => now - h.t < 150);
+    if (recent.length >= 2) {
+      const first = recent[0], last = recent[recent.length - 1];
+      const dx = last.x - first.x, dy = last.y - first.y;
+      const d  = Math.hypot(dx, dy);
+      const throwDt = (last.t - first.t) / 1000;
+      if (d > 2 && throwDt > 0) {
+        const throwSpd = Math.min(d / throwDt, dragTarget._baseSpeed * 5);
+        dragTarget.speed = throwSpd;
+        dragTarget.vx = (dx / d) * throwSpd;
+        dragTarget.vy = (dy / d) * throwSpd;
+      }
+    }
   }
-  tapTarget = null;
+  tapTarget = null; dragTarget = null; dragHistory = [];
 });
 
 let lastTs  = 0;
@@ -330,6 +394,10 @@ function frame(ts) {
   ctx.clearRect(0, 0, W, H);
 
   for (const a of amoebas) a.update(dt);
+  if (dragTarget) {
+    dragTarget.x = dragMx + dragOffsetX;
+    dragTarget.y = dragMy + dragOffsetY;
+  }
   for (const a of amoebas) a.buildPoints(simTime);
 
   // Draw order: normal → selected (topmost, with glow)
