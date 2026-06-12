@@ -5,39 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>David Gedye</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>G</text></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&display=swap" rel="stylesheet">
-  <style>
+<style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
     canvas { display: block; position: fixed; top: 0; left: 0; touch-action: none; cursor: pointer; }
-    #label {
-      display: none;
-      position: fixed;
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      font-family: 'Playfair Display', serif;
-      color: rgba(255, 255, 255, 0.95);
-      background: rgba(0, 0, 0, 0.48);
-      padding: 0.28em 0.75em;
-      border-radius: 3px;
-      white-space: nowrap;
-      letter-spacing: 0.04em;
-    }
   </style>
 </head>
 <body>
 <canvas id="c"></canvas>
-<div id="label"></div>
 <script>
-const canvas  = document.getElementById('c');
-const ctx     = canvas.getContext('2d');
-const labelEl = document.getElementById('label');
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
 
 const TENSION         = 8;
 const MARGIN          = 10;
-const P               = 10;     // skeleton points per blob
+const P               = 16;     // skeleton points per blob (4 per rectangle side)
 const COVERAGE        = 0.5625;
 const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
 const FADE_DURATION   = 1000;   // ms for each blob's fade-in
@@ -45,6 +27,7 @@ const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
 const R_NOISE_AMP     = 0.55;   // radial wiggle amplitude
 const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
 const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
+const MORPH_DURATION  = 1.5;    // seconds to morph open/closed
 
 const projects = [
   { title: 'Amoeba',         src: 'images/amoeba.jpeg',        url: '#' },
@@ -89,6 +72,10 @@ function sineNoise(phases, t) {
   return v;
 }
 
+function morphEase(t) {
+  return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+}
+
 function makePhases(n, targetAmp) {
   const raw = Array.from({ length: n }, () => ({
     freq:  0.3 + Math.random() * 1.4,
@@ -121,6 +108,11 @@ class Amoeba {
     this.vy = Math.sin(angle) * this.speed;
 
     this.age = Math.random() * 200;
+    this.imgAspect = 1;
+    this.imgW = 0;
+    this.imgH = 0;
+    this.morphState = 'idle'; // 'idle' | 'opening' | 'open' | 'closing'
+    this.morphT     = 0;
 
     this.rPhases    = Array.from({ length: P }, () => makePhases(4, R_NOISE_AMP));
     this.aPhases    = Array.from({ length: P }, () => makePhases(2, A_NOISE_AMP));
@@ -131,6 +123,21 @@ class Amoeba {
 
   update(dt) {
     this.age += dt; // wiggle continues even when frozen
+
+    if (this.morphState === 'opening') {
+      this.morphT = Math.min(1, this.morphT + dt / MORPH_DURATION);
+      if (this.morphT >= 1) this.morphState = 'open';
+    } else if (this.morphState === 'closing') {
+      this.morphT = Math.max(0, this.morphT - dt / MORPH_DURATION);
+      if (this.morphT <= 0) {
+        this.morphState = 'idle';
+        this.frozen = false;
+        this.speed = this._baseSpeed;
+        const angle = Math.random() * Math.PI * 2;
+        this.vx = Math.cos(angle) * this._baseSpeed;
+        this.vy = Math.sin(angle) * this._baseSpeed;
+      }
+    }
 
     if (this.frozen) return;
 
@@ -161,12 +168,54 @@ class Amoeba {
   }
 
   buildPoints(t) {
+    const rx   = this.baseR * Math.sqrt(this.imgAspect);
+    const ry   = this.baseR / Math.sqrt(this.imgAspect);
+    const ease = morphEase(this.morphT);
+    const tPts = this.morphT > 0 ? this._computeTargetPts() : null;
+
     for (let i = 0; i < P; i++) {
       const angle = (i / P) * Math.PI * 2 + sineNoise(this.aPhases[i], t * 0.12);
-      const r     = this.baseR * (1 + sineNoise(this.rPhases[i], t * 0.18));
-      this._pts[i][0] = Math.max(MARGIN, Math.min(W - MARGIN, this.x + Math.cos(angle) * r));
-      this._pts[i][1] = Math.max(MARGIN, Math.min(H - MARGIN, this.y + Math.sin(angle) * r));
+      const nr    = 1 + sineNoise(this.rPhases[i], t * 0.18);
+      let px = this.x + Math.cos(angle) * rx * nr;
+      let py = this.y + Math.sin(angle) * ry * nr;
+
+      if (tPts) {
+        px = px + (tPts[i][0] - px) * ease;
+        py = py + (tPts[i][1] - py) * ease;
+
+        // Subtle perpendicular wiggle on mid-edge points when nearly open
+        if (ease > 0.8 && (i % 4 === 1 || i % 4 === 2)) {
+          const blend = (ease - 0.8) / 0.2;
+          const nAmt  = sineNoise(this.rPhases[i], t * 0.05) * this.baseR * 0.06 * blend;
+          if (Math.floor(i / 4) % 2 === 0) px += nAmt; // right/left sides: x wiggle
+          else                              py += nAmt; // top/bottom sides: y wiggle
+        }
+      }
+
+      this._pts[i][0] = Math.max(MARGIN, Math.min(W - MARGIN, px));
+      this._pts[i][1] = Math.max(MARGIN, Math.min(H - MARGIN, py));
     }
+  }
+
+  // 16 target rectangle points, clockwise from right, matching blob winding order.
+  // Side order: right → bottom → left → top; 4 points per side at 20/40/60/80% of each side.
+  _computeTargetPts() {
+    const imgW_css = this.imgW / DPR;
+    const imgH_css = this.imgH / DPR;
+    const sc = Math.min(W * 0.85 / imgW_css, H * 0.85 / imgH_css);
+    const hw = imgW_css * sc / 2;
+    const hh = imgH_css * sc / 2;
+    const cx = this.x, cy = this.y;
+    return [
+      [cx + hw, cy - hh * 0.6], [cx + hw, cy - hh * 0.2], // right side, top half
+      [cx + hw, cy + hh * 0.2], [cx + hw, cy + hh * 0.6], // right side, bottom half
+      [cx + hw * 0.6, cy + hh], [cx + hw * 0.2, cy + hh], // bottom, right half
+      [cx - hw * 0.2, cy + hh], [cx - hw * 0.6, cy + hh], // bottom, left half
+      [cx - hw, cy + hh * 0.6], [cx - hw, cy + hh * 0.2], // left side, bottom half
+      [cx - hw, cy - hh * 0.2], [cx - hw, cy - hh * 0.6], // left side, top half
+      [cx - hw * 0.6, cy - hh], [cx - hw * 0.2, cy - hh], // top, left half
+      [cx + hw * 0.2, cy - hh], [cx + hw * 0.6, cy - hh], // top, right half
+    ];
   }
 
   // Trace the blob bezier outline onto c. Caller must call beginPath() first
@@ -196,14 +245,24 @@ class Amoeba {
     if (!this.ready) return;
 
     const alpha = Math.min(1, (performance.now() - this.fadeStart) / FADE_DURATION);
-    const s     = this.baseR * TEXTURE_SCALE;
+    const ease  = morphEase(this.morphT);
+
+    const blobW = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect);
+    const blobH = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect);
+    const imgW_css = this.imgW / DPR;
+    const imgH_css = this.imgH / DPR;
+    const sc    = Math.min(W * 0.85 / imgW_css, H * 0.85 / imgH_css);
+    const openW = imgW_css * sc;
+    const openH = imgH_css * sc;
+    const drawW = blobW + (openW - blobW) * ease;
+    const drawH = blobH + (openH - blobH) * ease;
 
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.beginPath();
     this._trace(ctx);
     ctx.clip();
-    ctx.drawImage(this.texture, this.x - s / 2, this.y - s / 2, s, s);
+    ctx.drawImage(this.texture, this.x - drawW / 2, this.y - drawH / 2, drawW, drawH);
     ctx.restore();
 
     if (isSelected) {
@@ -266,15 +325,15 @@ let _staggerOrigin = null;
 amoebas.forEach((a, step) => {
   const img = new Image();
   img.onload = () => {
-    const s = Math.min(img.width, img.height);
-    const sx = (img.width  - s) / 2;
-    const sy = (img.height - s) / 2;
-    // Size the texture to the image's natural short side — 1:1 physical pixels at max blob size
-    a.texture.width = a.texture.height = s;
-    a.texture.getContext('2d').drawImage(img, sx, sy, s, s, 0, 0, s, s);
+    a.imgW = img.naturalWidth;
+    a.imgH = img.naturalHeight;
+    a.imgAspect = img.naturalWidth / img.naturalHeight;
+    a.texture.width  = img.naturalWidth;
+    a.texture.height = img.naturalHeight;
+    a.texture.getContext('2d').drawImage(img, 0, 0);
 
-    // Tighten the global cap and recompute all radii
-    const cap = s / (TEXTURE_SCALE * DPR);
+    // Geometric mean gives the correct no-upscale bound for the elliptical draw
+    const cap = Math.sqrt(img.naturalWidth * img.naturalHeight) / (TEXTURE_SCALE * DPR);
     if (cap < _baseRMax) {
       _baseRMax = cap;
       for (const b of amoebas) b.baseR = computeBaseR();
@@ -293,29 +352,17 @@ amoebas.forEach((a, step) => {
 
 let selectedAmoeba = null;
 
-function positionLabel(a) {
-  labelEl.style.left     = a.x + 'px';
-  labelEl.style.top      = a.y + 'px';
-  labelEl.style.fontSize = Math.round(a.baseR * 0.165) + 'px';
-}
 
 function select(a) {
   selectedAmoeba = a;
   a.frozen = true;
-  labelEl.textContent = projects[a.index].title;
-  positionLabel(a);
-  labelEl.style.display = 'block';
+  a.morphState = 'opening';
 }
 
 function deselect() {
   if (!selectedAmoeba) return;
-  selectedAmoeba.frozen = false;
-  selectedAmoeba.speed  = selectedAmoeba._baseSpeed;
-  const angle = Math.random() * Math.PI * 2;
-  selectedAmoeba.vx = Math.cos(angle) * selectedAmoeba._baseSpeed;
-  selectedAmoeba.vy = Math.sin(angle) * selectedAmoeba._baseSpeed;
-  selectedAmoeba    = null;
-  labelEl.style.display = 'none';
+  selectedAmoeba.morphState = 'closing';
+  selectedAmoeba = null;
 }
 
 let tapTarget   = null;
@@ -335,7 +382,6 @@ canvas.addEventListener('pointerdown', e => {
     }
   }
   if (tapTarget) {
-    if (tapTarget.frozen) deselect(); // unfreeze so update() doesn't skip it
     dragTarget  = tapTarget;
     dragMx = e.clientX; dragMy = e.clientY;
     dragOffsetX = dragTarget.x - e.clientX;
@@ -400,11 +446,13 @@ function frame(ts) {
   }
   for (const a of amoebas) a.buildPoints(simTime);
 
-  // Draw order: normal → selected (topmost, with glow)
+  // Draw order: idle blobs first, then any morphing blob on top
   for (const a of amoebas) {
-    if (a !== selectedAmoeba) a.draw(false);
+    if (a.morphState === 'idle') a.draw(false);
   }
-  if (selectedAmoeba) selectedAmoeba.draw(true);
+  for (const a of amoebas) {
+    if (a.morphState !== 'idle') a.draw(a === selectedAmoeba);
+  }
 
   requestAnimationFrame(frame);
 }
