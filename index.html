@@ -26,8 +26,11 @@ const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
 const R_NOISE_AMP     = 0.55;   // radial wiggle amplitude
 const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
-const TURN_NOISE_AMP  = 0.35;   // heading drift amplitude
+const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
 const MORPH_DURATION  = 1.5;    // seconds to morph open/closed
+const MORPH_INSET     = 0.97;   // rectangle inset factor — keeps clip just inside image edges
+const MORPH_CORNER    = 0.88;   // fraction along each side where corner curve begins
+const MORPH_MID       = 0.35;   // fraction along each side for mid-edge points
 
 const projects = [
   { title: 'Amoeba',         src: 'images/amoeba.jpeg',        url: '#' },
@@ -200,18 +203,19 @@ class Amoeba {
   // 16 target rectangle points, clockwise from right, matching blob winding order.
   // Side order: right → bottom → left → top; 4 points per side at 20/40/60/80% of each side.
   _computeTargetPts() {
-    const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2;
-    const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2;
+    const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
+    const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const cx = this.x, cy = this.y;
+    const C = MORPH_CORNER, M = MORPH_MID;
     return [
-      [cx + hw, cy - hh * 0.82], [cx + hw, cy - hh * 0.35], // right side, top half
-      [cx + hw, cy + hh * 0.35], [cx + hw, cy + hh * 0.82], // right side, bottom half
-      [cx + hw * 0.82, cy + hh], [cx + hw * 0.35, cy + hh], // bottom, right half
-      [cx - hw * 0.35, cy + hh], [cx - hw * 0.82, cy + hh], // bottom, left half
-      [cx - hw, cy + hh * 0.82], [cx - hw, cy + hh * 0.35], // left side, bottom half
-      [cx - hw, cy - hh * 0.35], [cx - hw, cy - hh * 0.82], // left side, top half
-      [cx - hw * 0.82, cy - hh], [cx - hw * 0.35, cy - hh], // top, left half
-      [cx + hw * 0.35, cy - hh], [cx + hw * 0.82, cy - hh], // top, right half
+      [cx + hw, cy - hh * C], [cx + hw, cy - hh * M], // right side, top half
+      [cx + hw, cy + hh * M], [cx + hw, cy + hh * C], // right side, bottom half
+      [cx + hw * C, cy + hh], [cx + hw * M, cy + hh], // bottom, right half
+      [cx - hw * M, cy + hh], [cx - hw * C, cy + hh], // bottom, left half
+      [cx - hw, cy + hh * C], [cx - hw, cy + hh * M], // left side, bottom half
+      [cx - hw, cy - hh * M], [cx - hw, cy - hh * C], // left side, top half
+      [cx - hw * C, cy - hh], [cx - hw * M, cy - hh], // top, left half
+      [cx + hw * M, cy - hh], [cx + hw * C, cy - hh], // top, right half
     ];
   }
 
