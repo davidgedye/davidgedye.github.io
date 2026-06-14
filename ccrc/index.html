@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seattle CCRC Comparison — June 2026</title>
+<style>
+:root {
+  --bg: #f6f3ee;
+  --card: #ffffff;
+  --text: #1a1918;
+  --text-muted: #5c574f;
+  --text-light: #8a847a;
+  --border: #d4cfc5;
+  --border-light: #ebe7e0;
+  --g1: #2d5a3e;
+  --g2: #6b4c2a;
+  --g3: #1e3d5c;
+  --g4: #3d2f6b;
+  --g5: #5a3c1e;
+  --warn-bg: #fff5e6;
+  --warn-border: #c45c00;
+  --warn-text: #7d3a00;
+  --font-serif: Georgia, 'Palatino Linotype', Palatino, serif;
+  --font-sans: 'Trebuchet MS', 'Gill Sans MT', Verdana, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.document {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 28px 32px 40px;
+}
+
+/* ── HEADER ── */
+.doc-header {
+  border-bottom: 2px solid var(--text);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+.doc-header h1 {
+  font-size: 2.2em;
+  font-weight: normal;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.doc-header .subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.75em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.doc-header .disclaimer {
+  font-family: var(--font-sans);
+  font-size: 0.78em;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ── LEGEND ── */
+.legend {
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  align-items: baseline;
+}
+.legend-title {
+  font-family: var(--font-sans);
+  font-size: 0.7em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  font-weight: bold;
+  flex: 0 0 100%;
+  margin-bottom: 2px;
+}
+.legend-item {
+  font-family: var(--font-sans);
+  font-size: 0.78em;
+  color: var(--text-muted);
+}
+.legend-item strong { color: var(--text); }
+.abbr-tag {
+  display: inline-block;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  font-size: 0.85em;
+  font-family: var(--font-sans);
+  color: var(--text-muted);
+  margin: 0 1px;
+}
+
+/* ── GROUP SECTIONS ── */
+.group { margin-bottom: 24px; }
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.group-num {
+  font-family: var(--font-sans);
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  font-weight: bold;
+}
+.group-stripe { height: 3px; width: 32px; border-radius: 2px; flex-shrink: 0; }
+.group-header h2 {
+  font-family: var(--font-serif);
+  font-size: 1.1em;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.group-1 .group-stripe { background: var(--g1); }
+.group-2 .group-stripe { background: var(--g2); }
+.group-3 .group-stripe { background: var(--g3); }
+.group-4 .group-stripe { background: var(--g4); }
+.group-5 .group-stripe { background: var(--g5); }
+
+/* ── COMMUNITY CARDS ── */
+.community {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.group-1 .community { border-left: 4px solid var(--g1); }
+.group-2 .community { border-left: 4px solid var(--g2); }
+.group-3 .community { border-left: 4px solid var(--g3); }
+.group-4 .community { border-left: 4px solid var(--g4); }
+.group-5 .community { border-left: 4px solid var(--g5); }
+
+.community.financial-warning {
+  border-top: 3px solid var(--warn-border);
+}
+
+/* community header bar */
+.community-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 9px 14px 7px;
+  border-bottom: 1px solid var(--border-light);
+  gap: 12px;
+}
+.community-title h3 {
+  font-size: 1.45em;
+  font-weight: normal;
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.community-title h3 a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.community-title h3 a:hover {
+  border-bottom-color: var(--g3);
+  color: var(--g3);
+}
+.community-address {
+  font-family: var(--font-sans);
+  font-size: 0.74em;
+  color: var(--text-muted);
+}
+.community-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.badge {
+  font-family: var(--font-sans);
+  font-size: 0.66em;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  font-weight: bold;
+  white-space: nowrap;
+  border: 1px solid;
+}
+.badge-nonprofit  { background: #e8f0ec; color: #2d5a3e; border-color: #a8ccb2; }
+.badge-forprofit  { background: #f0ece8; color: #6b4c2a; border-color: #c8b09a; }
+.badge-fullccrc   { background: #e8edf5; color: #1e3d5c; border-color: #a8bcd4; }
+.badge-partial    { background: #faf5e8; color: #7a5c00; border-color: #d8c070; }
+.badge-warning    { background: var(--warn-bg); color: var(--warn-text); border-color: var(--warn-border); }
+.badge-waitlist   { background: #f5eaf5; color: #5c1e5c; border-color: #c8a0c8; }
+
+/* card body */
+.community-body {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+}
+
+.community-meta {
+  padding: 10px 14px;
+  border-right: 1px solid var(--border-light);
+  background: #faf9f6;
+}
+
+.meta-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+.meta-table tr { border-bottom: 1px solid var(--border-light); }
+.meta-table tr:last-child { border-bottom: none; }
+.meta-table th {
+  font-family: var(--font-sans);
+  font-size: 0.7em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  font-weight: normal;
+  padding: 3px 8px 3px 0;
+  vertical-align: top;
+  white-space: nowrap;
+  width: 88px;
+}
+.meta-table td {
+  font-family: var(--font-sans);
+  font-size: 0.79em;
+  color: var(--text);
+  padding: 3px 0 3px 4px;
+  vertical-align: top;
+  line-height: 1.4;
+}
+.meta-table td a { color: var(--g3); text-decoration: none; }
+.meta-table td a:hover { text-decoration: underline; }
+.meta-table td em { color: var(--text-muted); font-style: italic; }
+
+.notes-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 9px 11px;
+  font-family: var(--font-sans);
+  font-size: 0.75em;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.notes-box strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.88em;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.financial-warning .notes-box {
+  background: var(--warn-bg);
+  border-color: var(--warn-border);
+  color: var(--warn-text);
+}
+
+/* vibe */
+.community-vibe { padding: 10px 14px; }
+.vibe-label {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.67em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 7px;
+}
+.community-vibe p {
+  font-size: 0.84em;
+  line-height: 1.58;
+  color: var(--text);
+}
+.community-vibe p strong { color: var(--warn-text); }
+
+/* ── COMPARISON TABLE ── */
+.comparison-section {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 2px solid var(--text);
+}
+.comparison-section h2 {
+  font-size: 1.3em;
+  font-weight: normal;
+  margin-bottom: 4px;
+}
+.section-sub {
+  font-family: var(--font-sans);
+  font-size: 0.76em;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  letter-spacing: 0.04em;
+}
+.comp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-sans);
+  font-size: 0.79em;
+}
+.comp-table thead th {
+  font-size: 0.7em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: bold;
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+  background: var(--card);
+}
+.comp-table tbody tr { border-bottom: 1px solid var(--border-light); }
+.comp-table tbody tr:hover { background: #f9f7f3; }
+.comp-table tbody td {
+  padding: 8px 10px;
+  vertical-align: top;
+  line-height: 1.4;
+}
+.comp-table tbody td:first-child { font-weight: bold; }
+.comp-table .warn-row { background: #fff8f0; }
+.comp-table .warn-row td { color: var(--warn-text); }
+.icon-yes { color: #2d5a3e; }
+.icon-no  { color: #8a847a; }
+.icon-partial { color: #b08000; }
+.owner-group-row td {
+  background: #eeebe4;
+  font-family: var(--font-sans);
+  font-size: 0.72em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.warn-owner-row td {
+  background: #fdf0e0;
+  color: var(--warn-text);
+}
+.owner-note {
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 1em;
+  opacity: 0.8;
+}
+
+/* ── FOOTER ── */
+.doc-footer {
+  margin-top: 44px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-family: var(--font-sans);
+  font-size: 0.71em;
+  color: var(--text-light);
+  line-height: 1.6;
+}
+
+/* ── FOOTNOTES ── */
+.fn-section {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.fn-section h3 {
+  font-family: var(--font-sans);
+  font-size: 0.72em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+.fn-list {
+  list-style: none;
+  padding: 0;
+}
+.fn-list li {
+  font-family: var(--font-sans);
+  font-size: 0.75em;
+  color: var(--text-muted);
+  line-height: 1.5;
+  padding: 3px 0;
+  display: flex;
+  gap: 8px;
+}
+.fn-list li .fn-num {
+  flex-shrink: 0;
+  color: var(--text-light);
+  font-weight: bold;
+  min-width: 20px;
+}
+.fn-list li a { color: var(--g3); }
+.fn-unverified {
+  margin-top: 10px;
+  padding: 8px 12px;
+  background: #faf8f0;
+  border: 1px solid #d8d0a0;
+  font-family: var(--font-sans);
+  font-size: 0.75em;
+  color: #6b5c00;
+  line-height: 1.5;
+}
+sup.fnref a {
+  font-family: var(--font-sans);
+  font-size: 0.65em;
+  color: var(--g3);
+  text-decoration: none;
+  opacity: 0.8;
+}
+sup.fnref a:hover { opacity: 1; text-decoration: underline; }
+sup.unv {
+  font-family: var(--font-sans);
+  font-size: 0.65em;
+  color: #9a7c00;
+  cursor: help;
+}
+
+/* ── PRINT ── */
+@media print {
+  @page { size: 11in 8.5in landscape; margin: 0.45in 0.5in; }
+
+  body { background: white; font-size: 12px; }
+  .document { max-width: none; padding: 0; }
+
+  .community {
+    box-shadow: none;
+    overflow: visible;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    margin-bottom: 12px;
+  }
+  .community-body {
+    grid-template-columns: 1fr 240px;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .community-meta { background: #fafaf8; padding: 7px 10px; }
+  .community-vibe { padding: 7px 10px; }
+  .community-header { padding: 6px 10px; }
+  .community-title h3 { font-size: 1.2em; }
+
+  .group { margin-bottom: 16px; }
+  .group-header { page-break-after: avoid; break-after: avoid; }
+  .community-meta, .community-vibe {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .comparison-section {
+    page-break-before: always;
+    break-before: always;
+    margin-top: 0;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  .community-title h3 a { border-bottom: none; }
+
+  .notes-box { background: #f8f8f5; }
+  .financial-warning .notes-box { background: #fff5ec; }
+}
+</style>
+</head>
+<body>
+<div class="document">
+
+  <header class="doc-header">
+    <h1>Seattle Continuing Care Retirement Communities</h1>
+    <p class="subtitle">Comparison Guide &nbsp;·&nbsp; June 2026</p>
+    <p class="disclaimer">Prices directional; verify all figures directly with communities before any commitment.</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-title">Key</div>
+    <div class="legend-item"><strong>Entry fee</strong> — one-time buy-in at move-in</div>
+    <div class="legend-item"><strong>Refund</strong> — % of entry fee returned when resident leaves</div>
+    <div class="legend-item"><strong>Monthly</strong> — ongoing fee covering residence, dining, services</div>
+    <div class="legend-item">
+      Care levels:
+      <span class="abbr-tag">IL</span> Independent Living
+      <span class="abbr-tag">AL</span> Assisted Living
+      <span class="abbr-tag">MC</span> Memory Care
+      <span class="abbr-tag">SNF</span> Skilled Nursing
+      <span class="abbr-tag">Rehab</span> Rehabilitation
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GROUP 1: Nature / Park-adjacent                       -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="group group-1">
+    <div class="group-header">
+      <span class="group-num">01</span>
+      <div class="group-stripe"></div>
+      <h2>Nature-oriented / Park-adjacent</h2>
+    </div>
+
+    <!-- PARKSHORE -->
+    <div class="community" id="parkshore">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://transformingage.org/community/parkshore/">Parkshore</a></h3>
+          <div class="community-address">Madison Park &nbsp;·&nbsp; 1630 43rd Ave E, Seattle WA 98112</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-fullccrc">Full CCRC</span>
+          <span class="badge badge-waitlist">Waitlist Closed</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1963</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit — Transforming Age (multi-site nonprofit)</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Memory Care · Skilled Nursing · Rehab<br><em>Full continuum on-site</em></td></tr>
+            <tr><th>Entry fee</th><td>From ~$489,000 (varies by unit size, floor, view, occupancy) <sup class="unv" title="Not found on public aggregator sites — verify directly with community">†</sup></td></tr>
+            <tr><th>Refund</th><td>Percentage refundable — exact terms not published; confirm directly (industry-typical 60–80%) <sup class="unv" title="Not found on public aggregator sites — verify directly with community">†</sup></td></tr>
+            <tr><th>Monthly</th><td>~$3,200–$5,455+; avg ~$5,330 <sup class="fnref"><a href="#fn1">[1]</a></sup>. Includes utilities, dining credit, housekeeping, transportation</td></tr>
+            <tr><th>Website</th><td><a href="https://transformingage.org/community/parkshore/">transformingage.org/community/parkshore</a></td></tr>
+            <tr><th>Phone</th><td>(206) 539-1915</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Waitlist currently closed as of 2023. Entry fee among the highest on this list, reflecting waterfront Madison Park location. Tax deduction ~6% of monthly fee as medical expense prepayment.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Serene, deeply casual, first-name community. Residents are long-time Madison Park locals who value waterfront access above all. Reviewers cite a "community table" ethos — strangers invited in at meals. Strong fitness culture. Genuinely feels like coming home rather than moving to a facility. One resident has lived here 10 years and calls it "my last move." Has a kayak dock. Closest Seattle equivalent to island life for someone coming from an outdoor-oriented lifestyle.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEARTHSTONE -->
+    <div class="community" id="hearthstone">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://www.hearthstone.org">The Hearthstone</a></h3>
+          <div class="community-address">Green Lake &nbsp;·&nbsp; 6720 East Green Lake Way N, Seattle WA 98103</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-partial">⚠ No On-site SNF since 4/2025</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1966</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit, independent</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Cognitive/Memory Support<br><em>On-site skilled nursing ended April 4, 2025 — SNF coordinated off-campus</em></td></tr>
+            <tr><th>Entry fee</th><td>From $195,000 (Lakeside building); Cove East and Cove West higher. Second-person fee: +5% of entry fee. AL community fee: $12,500 one-time <sup class="unv" title="Not found on public aggregator sites — verify directly with community">†</sup></td></tr>
+            <tr><th>Refund</th><td>Not publicly specified — confirm with community</td></tr>
+            <tr><th>Monthly</th><td>From $2,795 (Lakeside); Cove buildings higher. Avg ~$5,533 <sup class="fnref"><a href="#fn2">[2]</a></sup>. AL care fees additional, vary by needs</td></tr>
+            <tr><th>Website</th><td><a href="https://www.hearthstone.org">hearthstone.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 517-2216 (Sales &amp; Marketing)</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Entry fee used for capital improvements and campus maintenance. Meal points program provides dining flexibility.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Down-to-earth, community-focused, multi-generational neighborhood feel. Three-building campus directly on Green Lake's 2.8-mile loop path — one resident describes their dog as "SO happy living just one block from Green Lake park." Village-like scale, less institutional than high-rises. Attracts people who want belonging and nature over prestige. Some couples have met and married here. Long-term residents describe true community bonds. <strong>The SNF closure (April 2025) is a meaningful drawback</strong> for those who want full aging-in-place assurance on campus.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- THE KENNEY -->
+    <div class="community financial-warning" id="kenney">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="http://www.thekenney.org">The Kenney</a></h3>
+          <div class="community-address">West Seattle &nbsp;·&nbsp; 7125 Fauntleroy Way SW, Seattle WA 98136</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-partial">⚠ No On-site SNF</span>
+          <span class="badge badge-warning">⚠ Financial Caution — Receivership</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1901 (oldest senior community in West Seattle)</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit. Went into <strong>receivership July 2024</strong>; under turnaround management (SAK Healthcare as court-appointed receiver). Financial stability uncertain.</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Memory Care<br><em>No on-site skilled nursing — coordinated off-campus</em></td></tr>
+            <tr><th>Entry fee</th><td>Not publicly published; confirm directly given management change</td></tr>
+            <tr><th>Refund</th><td>Terms not currently published — verify directly</td></tr>
+            <tr><th>Monthly</th><td>Published 2023 rates: ~$3,110 (studio) to $6,208 (2BR) for IL. Current rates: call to verify <sup class="unv" title="No current estimates available on public aggregator sites (Seniorly shows no data — possibly receivership-related)">†</sup></td></tr>
+            <tr><th>Website</th><td><a href="http://www.thekenney.org">thekenney.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 933-2089</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>⚠ Financial caution</strong>
+            Do not commit financially without thoroughly verifying current receivership status and financial health. Rates may have changed under new management.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Campus-style complex with an actual arboretum, gardens, and park-like private grounds. Described as "like having a park in your backyard" — with Lincoln Park, Alki Beach, and Fauntleroy Ferry terminal right outside. Charming, historic West Seattle neighborhood feel. Bus line access. Guest rooms available. Very pet-friendly culture. P-patches (community garden plots) on grounds. Residents and families love the warmth and setting. <strong>However, the 2024 receivership is a significant red flag currently under management turnaround.</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GROUP 2: Village / Low-key                            -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="group group-2">
+    <div class="group-header">
+      <span class="group-num">02</span>
+      <div class="group-stripe"></div>
+      <h2>Neighborhood Village / Low-key Community</h2>
+    </div>
+
+    <!-- BAYVIEW -->
+    <div class="community" id="bayview">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://bayviewseattle.org">Bayview</a></h3>
+          <div class="community-address">Lower Queen Anne &nbsp;·&nbsp; 11 W Aloha St, Seattle WA 98119</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-partial">SNF Off-campus</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1961</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit, independent (volunteer board of trustees). Methodist-affiliated heritage, fully non-denominational in practice.</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Memory Care. SNF via off-campus partnership with Kline Galland. Intergenerational Children's Center on-site.</td></tr>
+            <tr><th>Entry fee</th><td>Three plans: (1) Standard with 60% refund; (2) Declining-to-zero over 5 years (~65% of standard price); (3) No entry fee (higher monthly). 60-day trial period with full refund on any plan. <sup class="unv" title="Entry fee dollar amounts not found on public aggregator sites — verify directly with community">†</sup></td></tr>
+            <tr><th>Refund</th><td>Up to 60% (standard plan). Full refund during 60-day trial. <sup class="unv" title="Refund terms not independently verified on public aggregator sites">†</sup></td></tr>
+            <tr><th>Monthly</th><td>~$2,600–$7,592; avg ~$5,096–$5,931 <sup class="fnref"><a href="#fn3">[3]</a></sup>. Includes 30 prepaid days + 10% healthcare service discount</td></tr>
+            <tr><th>Website</th><td><a href="https://bayviewseattle.org">bayviewseattle.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 284-7330</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Parking $200/mo when available. Pet deposit $1,000 non-refundable. Foundation supports residents who outlive resources. No-entry-fee rental option makes it accessible without large capital commitment.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Known above all for warmth — consistently described as feeling like family. 360° views from 10th floor, private terrace lawn, 56-ft saltwater therapy pool, dog park, and a unique on-site intergenerational children's center that brings young energy to the building. 10-story tower but intimate in scale. Near Myrtle Edwards Park and the Elliott Bay Trail for waterfront walks without leaving the neighborhood. Particularly praised for compassionate staff. Rated 4.5★ across reviews. No pretension — genuine community.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- UNIVERSITY HOUSE WALLINGFORD -->
+    <div class="community" id="uhw">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://www.eraliving.com/university-house-wallingford/">University House Wallingford</a></h3>
+          <div class="community-address">Wallingford &nbsp;·&nbsp; 4400 Stone Way N, Seattle WA 98103</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-forprofit">For-profit (Era Living)</span>
+          <span class="badge badge-partial">IL + AL Only — Not a Full CCRC</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1993</td></tr>
+            <tr><th>Ownership</th><td>For-profit — Era Living (8-community Seattle chain). Partnership with UW Retirement Association.</td></tr>
+            <tr><th>Care levels</th><td>IL · AL only<br><em>No memory care. No skilled nursing on-site. Not a full CCRC — limited continuum of care.</em></td></tr>
+            <tr><th>Entry fee</th><td>None — monthly rental model only</td></tr>
+            <tr><th>Refund</th><td>N/A (no entry fee)</td></tr>
+            <tr><th>Monthly</th><td>IL from ~$5,215/mo <sup class="fnref"><a href="#fn4">[4]</a></sup>. AL varies (area avg $7,420–$7,880). Includes chef-prepared meals, weekly housekeeping, linen service, scheduled transportation, wellness center with RN.</td></tr>
+            <tr><th>Website</th><td><a href="https://www.eraliving.com/university-house-wallingford/">eraliving.com/university-house-wallingford</a></td></tr>
+            <tr><th>Phone</th><td>(206) 633-4700</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Higher monthly than comparable entry-fee communities because no buy-in to offset costs. Not suitable for those who anticipate needing memory care or skilled nursing without relocating.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Intellectually flavored neighborhood retirement living — not a true CCRC. Steps from Wallingford shops, cafés, movie theater, and library. Academic culture via UW Retirement Association tie-in: lifelong learning emphasis, lectures, cultural events. Nearly 200 enrichment events/month. Cozy at 146 units. Well-reviewed for friendliness (9.3/10 Seniorly). Best for someone who values a walkable neighborhood, academic-minded peers, and no buy-in complexity — but who doesn't yet need or anticipate needing skilled nursing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GROUP 3: Urban / Culturally Engaged                   -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="group group-3">
+    <div class="group-header">
+      <span class="group-num">03</span>
+      <div class="group-stripe"></div>
+      <h2>Urban Active / Culturally Engaged</h2>
+    </div>
+
+    <!-- MIRABELLA -->
+    <div class="community" id="mirabella">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://www.mirabellaseattle.org">Mirabella</a></h3>
+          <div class="community-address">South Lake Union &nbsp;·&nbsp; 116 Fairview Ave N, Seattle WA 98109</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-fullccrc">Full CCRC</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>2008 (incorporated 2004; opened 2008–2009). LEED Gold certified 12-story tower.</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit — Pacific Retirement Services (Medford OR; 40+ communities in 7 states). All-local board including resident members.</td></tr>
+            <tr><th>Care levels</th><td>IL · AL (Residential Living) · Memory Care · Skilled Nursing · Rehab. Full continuum, all private suites. Virginia Mason Franciscan Health clinic on-site. Medicare 5-star rated (2024 U.S. News Best Nursing Homes).</td></tr>
+            <tr><th>Entry fee</th><td>Not publicly listed — call for quote. Most residences: up to 80% refundable. Limited options at 50% or non-refundable. Waitlist: $1,000 Social Membership (fully refundable); $10,000 Priority Membership (fully refundable, priority access). <sup class="unv" title="Entry fee dollar amounts and refund percentages not found on public aggregator sites — verify directly with community">†</sup></td></tr>
+            <tr><th>Refund</th><td>Up to 80–90% refundable (80% standard; some units 90%) <sup class="unv" title="Not independently verified on public aggregator sites">†</sup></td></tr>
+            <tr><th>Monthly</th><td>~$2,495–$7,592; avg ~$5,044 <sup class="fnref"><a href="#fn5">[5]</a></sup>. Includes utilities, cable, weekly housekeeping, valet parking with EV charging, 24-hr concierge, four dining venues.</td></tr>
+            <tr><th>Website</th><td><a href="https://www.mirabellaseattle.org">mirabellaseattle.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 254-1400</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Average monthly (~$6,641) is the highest on this list by some measures, reflecting the SLU location and premium amenities. Entrance fee options with lower refundability trade upfront cost for lower monthly.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Deliberately casual Seattle vibe — "do-your-own-thing" ethos mirroring SLU's innovation-district energy. Residents described as "accomplished innovators, artists, musicians, foodies, and adventurers." Ukulele group, drawing classes, lectures, lifelong learning. Five-minute walk to Lake Union Park, Pike Place, SAM, Benaroya Hall. Four dining venues including 10th-floor lakeview room. Woodworking shop, art studio, indoor pool, personal trainers. The most architecturally polished building on this list. Attracts globally-minded, active people who want urban convenience with a full care safety-net. Residents serve on committees and council.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALJOYA THORNTON PLACE -->
+    <div class="community" id="aljoya">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://www.eraliving.com/aljoya-thornton-place/">Aljoya Thornton Place</a></h3>
+          <div class="community-address">Northgate / Thornton Place &nbsp;·&nbsp; 450 NE 100th St, Seattle WA 98125</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-forprofit">For-profit (Era Living)</span>
+          <span class="badge badge-fullccrc">Full CCRC</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>~2010. 143 upscale units in urban-village setting adjacent to Link Light Rail.</td></tr>
+            <tr><th>Ownership</th><td>For-profit — Era Living</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Memory Care · Skilled Nursing<br><em>Full CCRC continuum</em></td></tr>
+            <tr><th>Entry fee</th><td>From ~$165,000 <sup class="fnref"><a href="#fn6">[6]</a></sup> (corroborated at ~$220,000 by separate source <sup class="fnref"><a href="#fn7">[7]</a></sup>). Options: standard (80% refundable) or 100% refundable (higher entry fee). No-entry-fee rental model also available at higher monthly.</td></tr>
+            <tr><th>Refund</th><td>80% refundable (standard); 100% refundable option available at higher entry fee. Refund paid after apartment re-leased.</td></tr>
+            <tr><th>Monthly</th><td>From ~$3,690 <sup class="fnref"><a href="#fn6">[6]</a></sup>; avg ~$4,950 (below Seattle CCRC avg of ~$5,750). Includes chef-prepared dining, weekly housekeeping, scheduled transportation. 24-hour dining flexibility.</td></tr>
+            <tr><th>Website</th><td><a href="https://www.eraliving.com/aljoya-thornton-place/">eraliving.com/aljoya-thornton-place</a></td></tr>
+            <tr><th>Phone</th><td>(206) 536-2704</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Most affordable full CCRC on this list by average monthly cost. 100% refundable option is unusual and worth understanding. Era Living's for-profit structure means no hardship fund if resources are exhausted.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>Upscale but not stuffy. Set within Thornton Place mixed-use development — restaurants, cinema, Thornton Creek trail, and Link Light Rail all at the doorstep. "Aljoya" means happiness. Active programming (~200 events/month), saltwater pool, full-service restaurant. Attracts active retirees who want new-construction quality, urban walkability, and transit access at a lower price point than the downtown towers. Newer construction means fresher apartments. Strong reviews (8.9/10 Seniorly). Northgate location is further from the traditional Seattle senior living cluster but well-connected by rail.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GROUP 4: Intellectual / Activist                      -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="group group-4">
+    <div class="group-header">
+      <span class="group-num">04</span>
+      <div class="group-stripe"></div>
+      <h2>Intellectual / Activist / Progressive</h2>
+    </div>
+
+    <!-- HORIZON HOUSE -->
+    <div class="community" id="horizonhouse">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://horizonhouse.org">Horizon House</a></h3>
+          <div class="community-address">First Hill &nbsp;·&nbsp; 900 University St, Seattle WA 98101</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-fullccrc">Full CCRC</span>
+          <span class="badge badge-waitlist">1–5 Yr Waitlist</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>1961. ~600 current residents. 33-story West Tower expansion underway, opening 2029 (~198 new residences).</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit, independent. Residents' Council plans and runs all programming. Residents Assistance Program (confidential financial support for those who outlive funds).</td></tr>
+            <tr><th>Care levels</th><td>IL · AL ("Supported Living") · Memory Care · Skilled Nursing. Full continuum. Virginia Mason Medical Center 0.1 miles away.</td></tr>
+            <tr><th>Entry fee</th><td>From ~$64,000 (lowest, 2025) — notably lower than comparable nonprofits. Fee is needs/apartment-based and ranges widely. <sup class="unv" title="Not found on public aggregator sites. A 2014 Caring.com user review cited $123,000 — too dated to compare. Verify directly with community.">†</sup></td></tr>
+            <tr><th>Refund</th><td>Percentage refundable varies by contract — confirm at inquiry</td></tr>
+            <tr><th>Monthly</th><td>~$2,104–$7,592; avg ~$4,848 <sup class="fnref"><a href="#fn8">[8]</a></sup> (below city average — deliberate accessibility commitment). Includes dining credit.</td></tr>
+            <tr><th>Website</th><td><a href="https://horizonhouse.org">horizonhouse.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 624-3700</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Waitlist: ~400 people; 1–5 year wait for preferred units. Lowest entry fee of any full nonprofit CCRC on this list. Monthly dining credit model rather than all-inclusive.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>The most distinctive culture on this list. Since 1961 has drawn artists, professors, independent thinkers, and social justice advocates. Residents plan and run all 70+ programs — environmental policy groups, secular philosophy, woodworking, political debates, advocacy work. Staff describe residents as "smart, energized, and active." The building itself described as somewhat dated ("dowdy") but the West Tower will address this by 2029. Lower entry cost than comparable nonprofits — a deliberate accessibility commitment reflecting progressive values. One visitor noted residents "dressed like they were going to church" — aspirational, engaged social culture. Not quiet or low-key.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- GROUP 5: Resort / Luxury                              -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="group group-5">
+    <div class="group-header">
+      <span class="group-num">05</span>
+      <div class="group-stripe"></div>
+      <h2>Resort / Luxury / Premium Amenities</h2>
+    </div>
+
+    <!-- SKYLINE -->
+    <div class="community" id="skyline">
+      <div class="community-header">
+        <div class="community-title">
+          <h3><a href="https://skylineseattle.org">Skyline</a></h3>
+          <div class="community-address">First Hill &nbsp;·&nbsp; 725 9th Ave, Seattle WA 98104</div>
+        </div>
+        <div class="community-badges">
+          <span class="badge badge-nonprofit">Nonprofit</span>
+          <span class="badge badge-fullccrc">Full CCRC</span>
+        </div>
+      </div>
+      <div class="community-body">
+        <div class="community-meta">
+          <table class="meta-table">
+            <tr><th>Established</th><td>~2005. Two interconnected towers. 2026 U.S. News Best Senior Living award.</td></tr>
+            <tr><th>Ownership</th><td>Nonprofit — Transforming Age</td></tr>
+            <tr><th>Care levels</th><td>IL · AL · Memory Care · Skilled Nursing · Rehab. Full CCRC. <strong>Unique: Seattle's only Type A Life Care contract</strong> — monthly fee stays predictable across all care levels. Type B (modified) also offered.</td></tr>
+            <tr><th>Entry fee</th><td>Not publicly listed — call for quote. One published example: ~$1,049,000 for a 2BR/2BA (Cascade Tower); corroborated by user review citing ~$1M <sup class="fnref"><a href="#fn9">[9]</a></sup>. Varies widely by unit. Up to 80% refundable.</td></tr>
+            <tr><th>Refund</th><td>Up to 80% refundable <sup class="unv" title="Not independently verified on public aggregator sites">†</sup></td></tr>
+            <tr><th>Monthly</th><td>IL ~$2,600–$7,592. AL rates start just under $6,000/mo <sup class="fnref"><a href="#fn9">[9]</a></sup>. <strong>Type A contract: monthly fee does NOT escalate when moving to AL or SNF.</strong> Valet parking included. Care fund supports residents who outlive resources.</td></tr>
+            <tr><th>Website</th><td><a href="https://skylineseattle.org">skylineseattle.org</a></td></tr>
+            <tr><th>Phone</th><td>(206) 207-0036</td></tr>
+          </table>
+          <div class="notes-box">
+            <strong>Notes on costs</strong>
+            Highest entry fees on this list. However, the Type A Life Care contract provides genuine long-term cost certainty — a financially meaningful differentiator for those expecting health needs to increase.
+          </div>
+        </div>
+        <div class="community-vibe">
+          <span class="vibe-label">Character &amp; Culture</span>
+          <p>The most amenity-dense community on this list. Five restaurant venues (Columbia Café, Bistro 725, Olympic Dining Room, Sound Bite, Sound Bar), 240-seat Performing Arts Center, rooftop garden with dog walk, 1,800 sq ft fitness center, valet parking. Culture is welcoming and inclusive — cliques explicitly discouraged, newcomers helped to integrate. Residents include retired professors and arts professionals. Sweeping views of Puget Sound and Olympic Mountains. Some negative reviews cite understaffing in the health services wing (The Terraces). Best for couples or individuals who prioritize financial predictability, hotel-level services, and the security of knowing monthly costs won't spike if health needs increase. The Type A contract is unique in Seattle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <!-- QUICK COMPARISON TABLE                                -->
+  <!-- ══════════════════════════════════════════════════════ -->
+  <section class="comparison-section">
+    <h2>Quick Comparison Reference</h2>
+    <p class="section-sub">All 9 communities at a glance</p>
+
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Facility</th>
+          <th>Neighborhood</th>
+          <th>Est.</th>
+          <th>Nonprofit?</th>
+          <th>Full CCRC?</th>
+          <th>Entry fee starts</th>
+          <th>Monthly avg</th>
+          <th>Refund</th>
+          <th>Vibe group</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="owner-group-row">
+          <td colspan="9">Transforming Age <span class="owner-note">— nonprofit, multi-site</span></td>
+        </tr>
+        <tr>
+          <td>Parkshore</td>
+          <td>Madison Park</td>
+          <td>1963</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td>~$489K</td>
+          <td>~$5,330</td>
+          <td>60–80% (confirm)</td>
+          <td>Nature / outdoor</td>
+        </tr>
+        <tr>
+          <td>Skyline</td>
+          <td>First Hill</td>
+          <td>~2005</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-yes">✓ Yes (Type A)</span></td>
+          <td>Call for quote (~$1M+ ex.)</td>
+          <td>~$2,600–$7,592 IL</td>
+          <td>Up to 80%</td>
+          <td>Resort / luxury</td>
+        </tr>
+
+        <tr class="owner-group-row">
+          <td colspan="9">Era Living <span class="owner-note">— for-profit, Seattle-based chain</span></td>
+        </tr>
+        <tr>
+          <td>Univ. House Wallingford</td>
+          <td>Wallingford</td>
+          <td>1993</td>
+          <td><span class="icon-no">✗ No</span></td>
+          <td><span class="icon-no">✗ IL+AL only</span></td>
+          <td>None</td>
+          <td>from $5,215</td>
+          <td>N/A</td>
+          <td>Village / academic</td>
+        </tr>
+        <tr>
+          <td>Aljoya Thornton Place</td>
+          <td>Northgate</td>
+          <td>~2010</td>
+          <td><span class="icon-no">✗ No</span></td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td>from ~$165,000 <sup class="fnref"><a href="#fn6">[6]</a></sup></td>
+          <td>~$4,950</td>
+          <td>80% or 100%</td>
+          <td>Urban active</td>
+        </tr>
+
+        <tr class="owner-group-row">
+          <td colspan="9">Pacific Retirement Services <span class="owner-note">— nonprofit, Oregon-based, 40+ communities nationally</span></td>
+        </tr>
+        <tr>
+          <td>Mirabella</td>
+          <td>South Lake Union</td>
+          <td>2008</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td>Call for quote</td>
+          <td>~$5,044–$6,641</td>
+          <td>80–90%</td>
+          <td>Urban active</td>
+        </tr>
+
+        <tr class="owner-group-row">
+          <td colspan="9">Independent Nonprofits <span class="owner-note">— each governed by its own board</span></td>
+        </tr>
+        <tr>
+          <td>Hearthstone</td>
+          <td>Green Lake</td>
+          <td>1966</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-partial">⚠ No SNF since 4/2025</span></td>
+          <td>~$195K</td>
+          <td>~$5,533</td>
+          <td>Confirm</td>
+          <td>Nature / outdoor</td>
+        </tr>
+        <tr>
+          <td>Bayview</td>
+          <td>Lower Queen Anne</td>
+          <td>1961</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-partial">⚠ SNF off-campus</span></td>
+          <td>Varies</td>
+          <td>~$5,096–$5,931</td>
+          <td>Up to 60%</td>
+          <td>Village / warm</td>
+        </tr>
+        <tr>
+          <td>Horizon House</td>
+          <td>First Hill</td>
+          <td>1961</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td>from ~$64K</td>
+          <td>~$4,848</td>
+          <td>Confirm</td>
+          <td>Intellectual / activist</td>
+        </tr>
+
+        <tr class="owner-group-row warn-owner-row">
+          <td colspan="9">Independent Nonprofit — Receivership <span class="owner-note">— SAK Healthcare as court-appointed receiver since July 2024</span></td>
+        </tr>
+        <tr class="warn-row">
+          <td>The Kenney ⚠</td>
+          <td>West Seattle</td>
+          <td>1901</td>
+          <td><span class="icon-yes">✓ Yes</span></td>
+          <td><span class="icon-partial">⚠ No SNF</span></td>
+          <td>Not published</td>
+          <td>~$3,110–$6,208</td>
+          <td>Not published</td>
+          <td>Nature / outdoor</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- FOOTNOTES -->
+  <section class="fn-section" id="footnotes">
+    <h3>Sources &amp; Footnotes</h3>
+    <ul class="fn-list">
+      <li><span class="fn-num">[1]</span> Parkshore avg monthly ~$5,330: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/park-shore">seniorly.com/park-shore</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[2]</span> The Hearthstone avg monthly ~$5,533: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/hearthstone">seniorly.com/hearthstone</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[3]</span> Bayview avg monthly ~$5,931: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/bayview-retirement-community">seniorly.com/bayview-retirement-community</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[4]</span> University House Wallingford from ~$5,215/mo: <a href="https://www.familyassets.com/assisted-living/washington/seattle/university-house-wallingford">familyassets.com/university-house-wallingford</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[5]</span> Mirabella avg monthly ~$5,044: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/mirabella-seattle">seniorly.com/mirabella-seattle</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[6]</span> Aljoya Thornton Place IL from $3,690/mo; entry fee from ~$165,000: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/aljoya-thornton-place">seniorly.com/aljoya-thornton-place</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[7]</span> Aljoya entry fee from ~$220,000 (corroborating source): <a href="https://www.caring.com/senior-living/washington/seattle/aljoya-thornton-place-northgate-98125">caring.com/aljoya-thornton-place</a> (accessed June 2026). Note: discrepancy between [6] and [7] may reflect different unit types or update timing — verify directly.</li>
+      <li><span class="fn-num">[8]</span> Horizon House avg monthly ~$4,848: <a href="https://www.familyassets.com/continuing-care-retirement-communities/washington/seattle/horizon-house">familyassets.com/horizon-house</a> (accessed June 2026)</li>
+      <li><span class="fn-num">[9]</span> Skyline entry fee ~$1M and AL/MC rates just under $6,000/mo: <a href="https://www.seniorly.com/continuing-care-retirement-community/washington/seattle/the-terraces-at-skyline">seniorly.com/skyline</a> and user review at <a href="https://www.caring.com/senior-living/washington/seattle/skyline-health-services">caring.com/skyline-health-services</a> (accessed June 2026). User reviews are informal; verify entry fee directly with community.</li>
+    </ul>
+    <div class="fn-unverified">
+      <strong>† Figures marked † could not be independently verified on public aggregator sites</strong> (seniorly.com, familyassets.com, aplaceformom.com, caring.com) as of June 2026. These sites typically gate CCRC entry fee data behind contact forms. Affected figures: Parkshore entry fee (~$489K), Hearthstone entry fee (~$195K), Bayview entry fee structure and refund %, Mirabella entry fee and refund %, Kenney monthly rates (no data on Seniorly — possibly receivership-related), Horizon House entry fee (~$64K), and Skyline refund %. Verify all figures directly with each community before making any decisions.
+    </div>
+  </section>
+
+  <footer class="doc-footer">
+    <p><strong>Sources:</strong> Community websites, familyassets.com, seniorly.com, miradorliving.com, seattleseniorlivingresource.com, caring.com, aplaceformom.com, U.S. News Best Senior Living 2026, Glassdoor/Indeed staff reviews, Yelp, Google Reviews. Compiled June 2026.</p>
+  </footer>
+
+</div>
+</body>
+</html>
