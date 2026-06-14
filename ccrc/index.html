@@ -480,6 +480,30 @@ sup.unv {
   .notes-box { background: #f8f8f5; }
   .financial-warning .notes-box { background: #fff5ec; }
 }
+
+/* ── MOBILE ── */
+@media (max-width: 640px) {
+  .document { padding: 14px 14px 28px; overflow-x: hidden; }
+
+  .doc-header h1 { font-size: 1.6em; }
+
+  .community-header { flex-wrap: wrap; }
+  .community-badges { justify-content: flex-start; }
+
+  .community-body { grid-template-columns: 1fr; }
+  .community-meta {
+    border-right: none;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .meta-table th { white-space: normal; width: 80px; }
+  .meta-table td { overflow-wrap: break-word; word-break: break-word; }
+
+  .comp-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
 </style>
 </head>
 <body>
@@ -895,6 +919,7 @@ sup.unv {
     <h2>Quick Comparison Reference</h2>
     <p class="section-sub">All 9 communities at a glance</p>
 
+    <div class="comp-table-scroll">
     <table class="comp-table">
       <thead>
         <tr>
@@ -1030,6 +1055,7 @@ sup.unv {
         </tr>
       </tbody>
     </table>
+    </div>
   </section>
 
   <!-- FOOTNOTES -->
