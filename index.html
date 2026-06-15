@@ -141,6 +141,9 @@ class Amoeba {
     if (this.morphState === 'opening') {
       this.morphT = Math.min(1, this.morphT + dt / MORPH_DURATION);
       if (this.morphT >= 1) this.morphState = 'open';
+      const e = morphEase(this.morphT);
+      this.x = this.morphStartX + (this.morphTargetX - this.morphStartX) * e;
+      this.y = this.morphStartY + (this.morphTargetY - this.morphStartY) * e;
     } else if (this.morphState === 'closing') {
       this.morphT = Math.max(0, this.morphT - dt / MORPH_DURATION);
       if (this.morphT <= 0) {
@@ -397,6 +400,12 @@ let selectedAmoeba = null;
 function select(a) {
   selectedAmoeba = a;
   a.frozen = true;
+  a.morphStartX = a.x;
+  a.morphStartY = a.y;
+  const hw = a.baseR * TEXTURE_SCALE * Math.sqrt(a.imgAspect) / 2 * MORPH_INSET;
+  const hh = a.baseR * TEXTURE_SCALE / Math.sqrt(a.imgAspect) / 2 * MORPH_INSET;
+  a.morphTargetX = Math.max(hw + MARGIN, Math.min(W - hw - MARGIN, a.x));
+  a.morphTargetY = Math.max(hh + MARGIN, Math.min(H - hh - MARGIN, a.y));
   a.morphState = 'opening';
 }
 
