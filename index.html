@@ -33,16 +33,16 @@ const MORPH_CORNER    = 0.88;   // fraction along each side where corner curve b
 const MORPH_MID       = 0.35;   // fraction along each side for mid-edge points
 
 const projects = [
-  { title: 'Amoeba',         src: 'images/amoeba.jpeg',        imgSize:  699, url: '#' },
-  { title: 'Antipodes',      src: 'images/antipodes.jpeg',     imgSize: 1272, url: '#' },
-  { title: 'Boxcraft',       src: 'images/boxcraft.jpeg',      imgSize: 1286, url: '#' },
-  { title: 'Christine Gedye',src: 'images/christinegedye.jpeg',imgSize: 1414, url: '#' },
-  { title: 'Great Circles',  src: 'images/greatcircles.jpeg',  imgSize:  987, url: '#' },
-  { title: 'Hoyte',          src: 'images/hoyte.jpeg',         imgSize: 1021, url: '#' },
-  { title: 'Montages',       src: 'images/montages.jpeg',      imgSize:  943, url: '#' },
-  { title: 'SmugMug',        src: 'images/smugmug.jpeg',       imgSize: 1154, url: '#' },
-  { title: 'Strava',         src: 'images/strava.jpeg',        imgSize:  887, url: '#' },
-  { title: 'Substack',       src: 'images/substack.jpeg',      imgSize:  941, url: '#' },
+  { title: 'Christine Gedye Landscapes',   src: 'images/christinegedye.jpeg', imgSize: 1414, url: '#' },
+  { title: 'Boxcraft',                     src: 'images/boxcraft.jpeg',       imgSize: 1286, url: '#' },
+  { title: 'Antipodes',                    src: 'images/antipodes.jpeg',      imgSize: 1272, url: '#' },
+  { title: 'Family Photos',               src: 'images/smugmug.jpeg',        imgSize: 1154, url: '#' },
+  { title: 'Cambridge Hannibal Expedition',src: 'images/hoyte.jpeg',         imgSize: 1021, url: '#' },
+  { title: 'Great Circles',               src: 'images/greatcircles.jpeg',   imgSize:  987, url: '#' },
+  { title: 'Montages',                    src: 'images/montages.jpeg',       imgSize:  943, url: '#' },
+  { title: 'Essays and Poems',            src: 'images/substack.jpeg',       imgSize:  941, url: '#' },
+  { title: 'Just Keep Running',           src: 'images/strava.jpeg',         imgSize:  887, url: '#' },
+  { title: 'Amoeba Soup',                 src: 'images/amoeba.jpeg',         imgSize:  699, url: '#' },
 ];
 
 const N = projects.length;
@@ -432,9 +432,9 @@ function frame(ts) {
   }
   for (const a of amoebas) a.buildPoints(simTime);
 
-  // Draw order: idle blobs first, then any morphing blob on top
-  for (const a of amoebas) {
-    if (a.morphState === 'idle') a.draw(false);
+  // Draw idle blobs smallest-first (reverse index) so larger blobs render on top
+  for (let i = amoebas.length - 1; i >= 0; i--) {
+    if (amoebas[i].morphState === 'idle') amoebas[i].draw(false);
   }
   for (const a of amoebas) {
     if (a.morphState !== 'idle') a.draw(a === selectedAmoeba);

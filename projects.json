@@ -1,0 +1,62 @@
+[
+  {
+    "title": "Christine Gedye Landscapes",
+    "description": "Luminous atmospheric paintings of the Pacific Northwest.",
+    "imageUrl": "images/christinegedye.jpeg",
+    "siteUrl": "https://christinegedye.com/"
+  },
+  {
+    "title": "Boxcraft",
+    "description": "Efficient and attractive rectangle packing algorithms.",
+    "imageUrl": "images/boxcraft.jpeg",
+    "siteUrl": "https://github.com/davidgedye/boxcraft"
+  },
+  {
+    "title": "Antipodes",
+    "description": "If you could dig a hole through the Earth...",
+    "imageUrl": "images/antipodes.jpeg",
+    "siteUrl": "https://antipodes.gedye.com/"
+  },
+  {
+    "title": "Family Photos",
+    "description": "Family and Travel photos from 2005 onwards",
+    "imageUrl": "images/smugmug.jpeg",
+    "siteUrl": "https://gedye.smugmug.com"
+  },
+  {
+    "title": "Cambridge Hannibal Expedition",
+    "description": "An openSeadragon view of John Hoyte's 1956 scrapbook.",
+    "imageUrl": "images/hoyte.jpeg",
+    "siteUrl": "https://hoyte.gedye.com/1956expedition/"
+  },
+  {
+    "title": "Great Circles",
+    "description": "What is the wettest or driest circumference of the Earth?",
+    "imageUrl": "images/greatcircles.jpeg",
+    "siteUrl": "https://greatcircles.gedye.com/"
+  },
+  {
+    "title": "Montages",
+    "description": "Reflections in space and translations in time.",
+    "imageUrl": "images/montages.jpeg",
+    "siteUrl": "https://gedye.com/sdc/montages/"
+  },
+  {
+    "title": "Essays and Poems",
+    "description": "David's substack: narrative non-fiction poetry and more.",
+    "imageUrl": "images/substack.jpeg",
+    "siteUrl": "https://gedye.substack.com"
+  },
+  {
+    "title": "Just Keep Running",
+    "description": "David's motivator to get out there most mornings",
+    "imageUrl": "images/strava.jpeg",
+    "siteUrl": "https://strava.gedye.com"
+  },
+  {
+    "title": "Amoeba Soup",
+    "description": "These little fellows are calm, but hungry.",
+    "imageUrl": "images/amoeba.jpeg",
+    "siteUrl": "https://gedye.com/amoeba/"
+  }
+]
