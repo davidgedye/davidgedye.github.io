@@ -313,7 +313,7 @@ class Amoeba {
     ctx.font         = `normal ${titleSize}px Georgia, serif`;
     ctx.textAlign    = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(proj.title, px + margin, py + ph * 0.65, pw - margin * 2);
+    ctx.fillText(proj.title, px + margin, py + ph * 0.65 - titleSize * 0.5, pw - margin * 2);
   }
 }
 
