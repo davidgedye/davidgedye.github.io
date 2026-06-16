@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>David Gedye</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>G</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; overflow: hidden; background: #111; }
@@ -16,13 +17,14 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       color: #fff;
-      pointer-events: none;
+      pointer-events: auto;
       z-index: 10;
       visibility: hidden;
       transition: transform 0.5s cubic-bezier(0.645,0.045,0.355,1);
     }
-    #info-panel h2 { font: normal 1.2rem/1.3 Georgia, serif; margin-bottom: 0.5em; }
-    #info-panel p  { font: 0.875rem/1.55 system-ui, sans-serif; color: #bbb; margin: 0; }
+    #info-panel h2   { font: normal 1.2rem/1.3 Georgia, serif; margin-bottom: 0.5em; }
+    #info-panel p    { font: 0.875rem/1.55 system-ui, sans-serif; color: #bbb; margin: 0; }
+    #info-panel p a  { color: #9cf; text-underline-offset: 3px; }
 
     /* Landscape: side panels */
     #info-panel.left  { top:0; left:0;  width:min(280px,26vw); height:100%; padding:2rem 1.5rem; display:flex; flex-direction:column; justify-content:center; visibility:visible; transform:translateX(-100%); }
@@ -335,7 +337,9 @@ const panel = document.getElementById('info-panel');
 function showPanel(a) {
   const proj = projects[a.index];
   panel.querySelector('h2').textContent = proj.title;
-  panel.querySelector('p').textContent  = proj.description || '';
+  const descEl = panel.querySelector('p');
+  descEl.innerHTML = marked.parse(proj.description || '');
+  descEl.querySelectorAll('a').forEach(a => a.setAttribute('target', '_blank'));
   const landscape = W > H;
   panel.style.transition = 'none';
   panel.className = landscape ? (a.x < W / 2 ? 'right' : 'left')
