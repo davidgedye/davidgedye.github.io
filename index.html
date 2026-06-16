@@ -298,37 +298,22 @@ class Amoeba {
   _drawPanel(ctx, proj) {
     const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
-    const pw = hw * 2, ph = hh * 0.5;
+    const pw = hw * 2, ph = hh * 0.28;
     const px = this.x - hw, py = this.y + hh - ph;
     const margin = pw * 0.05;
 
     const grad = ctx.createLinearGradient(0, py, 0, py + ph);
     grad.addColorStop(0,   'rgba(0,0,0,0)');
-    grad.addColorStop(0.4, 'rgba(0,0,0,0.55)');
-    grad.addColorStop(1,   'rgba(0,0,0,0.82)');
+    grad.addColorStop(1,   'rgba(0,0,0,0.72)');
     ctx.fillStyle = grad;
     ctx.fillRect(px, py, pw, ph);
 
-    const titleSize = Math.max(16, Math.round(ph * 0.22));
+    const titleSize = Math.max(16, Math.round(ph * 0.38));
     ctx.fillStyle    = '#fff';
     ctx.font         = `normal ${titleSize}px Georgia, serif`;
     ctx.textAlign    = 'left';
-    ctx.textBaseline = 'top';
-    ctx.fillText(proj.title, px + margin, py + ph * 0.22, pw - margin * 2);
-
-    const descSize = Math.max(12, Math.round(ph * 0.15));
-    ctx.fillStyle  = '#ccc';
-    ctx.font       = `${descSize}px Verdana, sans-serif`;
-    ctx.fillText(proj.description || '', px + margin, py + ph * 0.22 + titleSize * 1.4, pw - margin * 2);
-
-    if (proj.siteUrl) {
-      const linkSize   = Math.max(12, Math.round(ph * 0.15));
-      ctx.fillStyle    = '#9cf';
-      ctx.font         = `bold ${linkSize}px Verdana, sans-serif`;
-      ctx.textAlign    = 'right';
-      ctx.textBaseline = 'bottom';
-      ctx.fillText('Visit →', px + pw - margin, py + ph * 0.92);
-    }
+    ctx.textBaseline = 'middle';
+    ctx.fillText(proj.title, px + margin, py + ph * 0.65, pw - margin * 2);
   }
 }
 
