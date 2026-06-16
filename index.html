@@ -332,21 +332,32 @@ let selectedAmoeba = null;
 
 const panel = document.getElementById('info-panel');
 
+let panelSide = null;
+
+function _slideIn(side) {
+  panel.style.transition = 'none';
+  panel.className = side;
+  panel.offsetHeight;          // force reflow — commits off-screen position
+  panel.style.transition = '';
+  panel.classList.add('shown');
+  panelSide = side;
+}
+
 function showPanel(a) {
   const proj = projects[a.index];
   panel.querySelector('h2').textContent = proj.title;
   panel.querySelector('p').textContent  = proj.description || '';
-  const landscape = W > H;
-  panel.style.transition = 'none';
-  panel.className = landscape ? (a.x < W / 2 ? 'right' : 'left')
-                               : (a.y < H / 2 ? 'bottom' : 'top');
-  panel.offsetHeight;            // force reflow — commits off-screen position
-  panel.style.transition = '';
-  panel.classList.add('shown');
+
+  const side = (W > H) ? (a.x < W / 2 ? 'right' : 'left')
+                        : (a.y < H / 2 ? 'bottom' : 'top');
+
+  if (panel.classList.contains('shown') && side === panelSide) return;
+  _slideIn(side);
 }
 
 function hidePanel() {
   panel.classList.remove('shown');
+  panelSide = null;
   panel.addEventListener('transitionend', () => {
     if (!panel.classList.contains('shown')) panel.className = '';
   }, { once: true });
