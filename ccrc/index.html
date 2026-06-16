@@ -439,9 +439,9 @@ sup.unv {
 
 /* ── PRINT ── */
 @media print {
-  @page { size: 11in 8.5in landscape; margin: 0.45in 0.5in; }
+  @page { size: landscape; margin: 0.65in 0.75in; }
 
-  body { background: white; font-size: 12px; }
+  body { background: white; font-size: 16px; }
   .document { max-width: none; padding: 0; }
 
   .community {
@@ -452,14 +452,32 @@ sup.unv {
     margin-bottom: 12px;
   }
   .community-body {
-    grid-template-columns: 1fr 240px;
+    grid-template-columns: 1fr 290px;
     page-break-inside: avoid;
     break-inside: avoid;
   }
   .community-meta { background: #fafaf8; padding: 7px 10px; }
   .community-vibe { padding: 7px 10px; }
   .community-header { padding: 6px 10px; }
-  .community-title h3 { font-size: 1.2em; }
+  .community-title h3 { font-size: 1.15em; }
+
+  /* Explicit overrides for elements with very small relative sizes */
+  .legend-title { font-size: 11px; }
+  .legend-item { font-size: 14px; }
+  .badge { font-size: 11px; }
+  .meta-table th { font-size: 13px; white-space: normal; }
+  .meta-table td { font-size: 14px; }
+  .notes-box { background: #f8f8f5; font-size: 13px; }
+  .financial-warning .notes-box { background: #fff5ec; }
+  .vibe-label { font-size: 13px; }
+  .community-vibe p { font-size: 15px; }
+  .comp-table { font-size: 14px; }
+  .comp-table thead th { font-size: 13px; }
+  .owner-group-row td { font-size: 13px; }
+  .section-sub { font-size: 13px; }
+  .fn-section h3 { font-size: 11px; }
+  .fn-list li { font-size: 13px; }
+  .doc-footer { font-size: 11px; }
 
   .group { margin-bottom: 16px; }
   .group-header { page-break-after: avoid; break-after: avoid; }
@@ -476,9 +494,6 @@ sup.unv {
 
   a { color: inherit; text-decoration: none; }
   .community-title h3 a { border-bottom: none; }
-
-  .notes-box { background: #f8f8f5; }
-  .financial-warning .notes-box { background: #fff5ec; }
 }
 
 /* ── MOBILE ── */
