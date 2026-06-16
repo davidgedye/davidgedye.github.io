@@ -32,31 +32,9 @@ const MORPH_INSET     = 0.97;   // rectangle inset factor — keeps clip just in
 const MORPH_CORNER    = 0.88;   // fraction along each side where corner curve begins
 const MORPH_MID       = 0.35;   // fraction along each side for mid-edge points
 
-const projects = [
-  { title: 'Christine Gedye Landscapes',    src: 'images/christinegedye.jpeg', imgSize: 1414,
-    description: 'Luminous atmospheric paintings of the Pacific Northwest.', siteUrl: 'https://christinegedye.com/' },
-  { title: 'Antipodes',                     src: 'images/antipodes.jpeg',      imgSize: 1272,
-    description: 'If you could dig a hole through the Earth...', siteUrl: 'https://antipodes.gedye.com/' },
-  { title: 'Family Photos',                 src: 'images/smugmug.jpeg',        imgSize: 1154,
-    description: 'Family and travel photos from 2005 onwards.', siteUrl: 'https://gedye.smugmug.com' },
-  { title: '1956 Expedition',               src: 'images/hoyte.jpeg',          imgSize: 1021,
-    description: "An openSeadragon view of John Hoyte's 1956 scrapbook.", siteUrl: 'https://hoyte.gedye.com/1956expedition/' },
-  { title: 'Great Circles',                 src: 'images/greatcircles.jpeg',   imgSize:  987,
-    description: 'What is the wettest or driest circumference of the Earth?', siteUrl: 'https://greatcircles.gedye.com/' },
-  { title: 'Montages',                      src: 'images/montages.jpeg',       imgSize:  943,
-    description: 'Reflections in space and translations in time.', siteUrl: 'https://gedye.com/sdc/montages/' },
-  { title: 'Essays and Poems',              src: 'images/substack.jpeg',       imgSize:  941,
-    description: "David's substack: narrative non-fiction poetry and more.", siteUrl: 'https://gedye.substack.com' },
-  { title: 'Just Keep Running',             src: 'images/strava.jpeg',         imgSize:  887,
-    description: "David's motivator to get out there most mornings.", siteUrl: 'https://strava.gedye.com' },
-  { title: 'Amoeba Soup',                   src: 'images/amoeba.jpeg',         imgSize:  699,
-    description: 'These little fellows are calm, but hungry.', siteUrl: 'https://gedye.com/amoeba/' },
-  { title: 'Boxcraft',                      src: 'images/boxcraft.jpeg',       imgSize:  699,
-    description: 'Efficient and attractive rectangle packing algorithms.', siteUrl: 'https://github.com/davidgedye/boxcraft' },
-];
-
-const N = projects.length;
-const IMG_SIZE_SUM_SQ = projects.reduce((s, p) => s + p.imgSize ** 2, 0);
+let projects = [];
+let N = 0;
+let IMG_SIZE_SUM_SQ = 0;
 
 let W, H;
 
@@ -353,31 +331,7 @@ window.addEventListener('resize', () => {
   }, 150);
 });
 
-const amoebas = projects.map((_, i) => new Amoeba(i));
-
-// Load images in parallel; stagger starts as soon as the first image is ready
-let _staggerOrigin = null;
-
-amoebas.forEach((a, step) => {
-  const img = new Image();
-  img.onload = () => {
-    a.imgW = img.naturalWidth;
-    a.imgH = img.naturalHeight;
-    a.imgAspect = img.naturalWidth / img.naturalHeight;
-    a.texture.width  = img.naturalWidth;
-    a.texture.height = img.naturalHeight;
-    a.texture.getContext('2d').drawImage(img, 0, 0);
-
-    if (_staggerOrigin === null) _staggerOrigin = performance.now();
-    const delay = Math.max(0, _staggerOrigin + step * REVEAL_INTERVAL - performance.now());
-    setTimeout(() => {
-      placeBlob(a, amoebas.filter(b => b.ready));
-      a.ready     = true;
-      a.fadeStart = performance.now();
-    }, delay);
-  };
-  img.src = projects[step].src;
-});
+let amoebas = [];
 
 let selectedAmoeba = null;
 
@@ -496,7 +450,38 @@ function frame(ts) {
   requestAnimationFrame(frame);
 }
 
-requestAnimationFrame(frame);
+fetch('projects.json')
+  .then(r => r.json())
+  .then(data => {
+    projects        = data; // already sorted by imgSize descending in the JSON
+    N               = projects.length;
+    IMG_SIZE_SUM_SQ = projects.reduce((s, p) => s + p.imgSize ** 2, 0);
+    amoebas         = projects.map((_, i) => new Amoeba(i));
+
+    let _staggerOrigin = null;
+    amoebas.forEach((a, step) => {
+      const img = new Image();
+      img.onload = () => {
+        a.imgW = img.naturalWidth;
+        a.imgH = img.naturalHeight;
+        a.imgAspect = img.naturalWidth / img.naturalHeight;
+        a.texture.width  = img.naturalWidth;
+        a.texture.height = img.naturalHeight;
+        a.texture.getContext('2d').drawImage(img, 0, 0);
+
+        if (_staggerOrigin === null) _staggerOrigin = performance.now();
+        const delay = Math.max(0, _staggerOrigin + step * REVEAL_INTERVAL - performance.now());
+        setTimeout(() => {
+          placeBlob(a, amoebas.filter(b => b.ready));
+          a.ready     = true;
+          a.fadeStart = performance.now();
+        }, delay);
+      };
+      img.src = projects[step].imageUrl;
+    });
+
+    requestAnimationFrame(frame);
+  });
 </script>
 </body>
 </html>
