@@ -1,14 +1,14 @@
 [
   {
     "title": "Christine Gedye Landscapes",
-    "description": "Luminous atmospheric paintings of the Pacific Northwest.",
+    "description": "Luminous atmospheric paintings of the Pacific Northwest. This site shows Chris' exhibited paintings from 2010 to the present.",
     "imageUrl": "images/christinegedye.jpeg",
     "siteUrl": "https://christinegedye.com/",
     "imgSize": 1414
   },
   {
     "title": "Antipodes",
-    "description": "If you could dig a hole through the Earth...",
+    "description": "If you could dig a hole through the Earth where would you come out? We live on a very watery planet.",
     "imageUrl": "images/antipodes.jpeg",
     "siteUrl": "https://antipodes.gedye.com/",
     "imgSize": 1272
@@ -22,35 +22,35 @@
   },
   {
     "title": "1956 Expedition",
-    "description": "An openSeadragon view of John Hoyte's 1956 scrapbook.",
+    "description": "An openSeadragon view of John Hoyte's 1956 scrapbook. See [this substack essay](https://gedye.substack.com/p/hannibal-hoyte-and-happenstance) to get a better sense of John's extraordinary character and adventures.",
     "imageUrl": "images/hoyte.jpeg",
     "siteUrl": "https://hoyte.gedye.com/1956expedition/",
     "imgSize": 1021
   },
   {
     "title": "Great Circles",
-    "description": "What is the wettest or driest circumference of the Earth?",
+    "description": "What is the wettest or driest circumference of the Earth? This one is pretty geeky!",
     "imageUrl": "images/greatcircles.jpeg",
     "siteUrl": "https://greatcircles.gedye.com/",
     "imgSize": 987
   },
   {
     "title": "Montages",
-    "description": "Reflections in space and translations in time.",
+    "description": "David's manipulated photographs: Reflections in space and translations in time.",
     "imageUrl": "images/montages.jpeg",
     "siteUrl": "https://gedye.com/sdc/montages/",
     "imgSize": 943
   },
   {
     "title": "Essays and Poems",
-    "description": "David's substack: narrative non-fiction poetry and more.",
+    "description": "David's substack. From longform non-fiction verse to explorations of a tricky mathematical sequence.",
     "imageUrl": "images/substack.jpeg",
     "siteUrl": "https://gedye.substack.com",
     "imgSize": 941
   },
   {
     "title": "Just Keep Running",
-    "description": "David's motivator to get out there most mornings.",
+    "description": "David's motivator to get out there most mornings. It tracks his progress against goals, shows all the fun shapes he likes to make, and even tracks his imagined run around the entire planet.",
     "imageUrl": "images/strava.jpeg",
     "siteUrl": "https://strava.gedye.com",
     "imgSize": 887
@@ -63,14 +63,14 @@
   },
   {
     "title": "Amoeba Soup",
-    "description": "These little fellows are calm, but hungry.",
+    "description": "These little fellows are calm, but hungry. David is not exactly sure why he finds them so soothing.",
     "imageUrl": "images/amoeba.jpeg",
     "siteUrl": "https://gedye.com/amoeba/",
     "imgSize": 699
   },
   {
     "title": "Boxcraft",
-    "description": "Efficient and attractive rectangle packing algorithms.",
+    "description": "Efficient and attractive rectangle packing algorithms. Used for showing my running routes from Strava, but hopefully applicable more broadly.",
     "imageUrl": "images/boxcraft.jpeg",
     "siteUrl": "https://github.com/davidgedye/boxcraft",
     "imgSize": 699
