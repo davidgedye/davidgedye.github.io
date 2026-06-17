@@ -56,6 +56,12 @@
     "imgSize": 887
   },
   {
+    "title": "Contact",
+    "description": "",
+    "imageUrl": "images/contact.jpeg",
+    "imgSize": 837
+  },
+  {
     "title": "Amoeba Soup",
     "description": "These little fellows are calm, but hungry.",
     "imageUrl": "images/amoeba.jpeg",
