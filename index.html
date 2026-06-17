@@ -349,7 +349,8 @@ let selectedAmoeba = null;
 
 const panel = document.getElementById('info-panel');
 
-panel.addEventListener('click', () => {
+panel.addEventListener('click', e => {
+  if (e.target.closest('a')) return; // let the link itself handle the click
   if (!selectedAmoeba) return;
   const url = projects[selectedAmoeba.index].siteUrl;
   if (url) window.open(url, '_blank');
