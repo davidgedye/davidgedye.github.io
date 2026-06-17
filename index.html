@@ -348,7 +348,14 @@ function showPanel(a) {
   panel.querySelector('h2').textContent = proj.title;
   const descEl = panel.querySelector('p');
   descEl.innerHTML = marked.parse(proj.description || '');
-  descEl.querySelectorAll('a').forEach(a => a.setAttribute('target', '_blank'));
+  descEl.querySelectorAll('a').forEach(link => {
+    const href = link.getAttribute('href') || '';
+    if (href.startsWith('x-obf:')) {
+      link.setAttribute('href', 'mailto:' + href.slice(6).split('').reverse().join(''));
+    } else {
+      link.setAttribute('target', '_blank');
+    }
+  });
   if (proj.siteUrl) {
     const visit = document.createElement('span');
     visit.className = 'visit-label';
