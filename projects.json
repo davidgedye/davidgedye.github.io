@@ -1,5 +1,11 @@
 [
   {
+    "title": "Contact Us",
+    "description": "To reach the Gedyes of Seattle, email [David](x-obf:moc.eydeg@divad) or [Chris](x-obf:moc.eydeg@sirhc).",
+    "imageUrl": "images/contact.jpeg",
+    "imgSize": 837
+  },
+  {
     "title": "Christine Gedye Landscapes",
     "description": "Luminous atmospheric paintings of the Pacific Northwest. This site shows Chris' exhibited paintings from 2010 to the present.",
     "imageUrl": "images/christinegedye.jpeg",
@@ -54,12 +60,6 @@
     "imageUrl": "images/strava.jpeg",
     "siteUrl": "https://strava.gedye.com",
     "imgSize": 887
-  },
-  {
-    "title": "Contact Us",
-    "description": "To reach the Gedyes of Seattle, email [David](x-obf:moc.eydeg@divad) or [Chris](x-obf:moc.eydeg@sirhc).",
-    "imageUrl": "images/contact.jpeg",
-    "imgSize": 837
   },
   {
     "title": "Amoeba Soup",

@@ -65,8 +65,8 @@ const COVERAGE        = 0.4;
 const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
 const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
-const R_NOISE_AMP     = 0.55;   // radial wiggle amplitude
-const A_NOISE_AMP     = 0.12;   // angular wiggle amplitude
+const R_NOISE_AMP     = 0.15;   // radial wiggle amplitude
+const A_NOISE_AMP     = 0.03;   // angular wiggle amplitude
 const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
 const MORPH_DURATION  = 1.5;    // seconds to morph open/closed
 const MORPH_INSET     = 0.97;   // rectangle inset factor — keeps clip just inside image edges
@@ -510,7 +510,7 @@ function frame(ts) {
   }
   for (const a of amoebas) a.buildPoints(simTime);
 
-  // Draw idle blobs smallest-first (reverse index) so larger blobs render on top
+  // Draw idle blobs in reverse array order, so index 0 renders last (on top)
   for (let i = amoebas.length - 1; i >= 0; i--) {
     if (amoebas[i].morphState === 'idle') amoebas[i].draw(false);
   }
@@ -524,7 +524,7 @@ function frame(ts) {
 fetch('projects.json')
   .then(r => r.json())
   .then(data => {
-    projects        = data; // already sorted by imgSize descending in the JSON
+    projects        = data; // array order sets reveal sequence and idle z-stacking (index 0 = on top)
     N               = projects.length;
     IMG_SIZE_SUM_SQ = projects.reduce((s, p) => s + p.imgSize ** 2, 0);
     amoebas         = projects.map((_, i) => new Amoeba(i));
