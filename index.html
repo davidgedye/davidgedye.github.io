@@ -152,6 +152,7 @@ class Amoeba {
     this.turnPhases = makePhases(3, TURN_NOISE_AMP);
 
     this._pts = Array.from({ length: P }, () => [0, 0]);
+    this._targetPts = Array.from({ length: P }, () => [0, 0]);
   }
 
   update(dt) {
@@ -235,21 +236,32 @@ class Amoeba {
 
   // 16 target rectangle points, clockwise from right, matching blob winding order.
   // Side order: right → bottom → left → top; 4 points per side at 20/40/60/80% of each side.
+  // Writes into the preallocated _targetPts buffer instead of returning a fresh
+  // array — this runs every frame during morph, so allocating here would churn
+  // the GC for the full open/close animation.
   _computeTargetPts() {
     const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const cx = this.x, cy = this.y;
     const C = MORPH_CORNER, M = MORPH_MID;
-    return [
-      [cx + hw, cy - hh * C], [cx + hw, cy - hh * M], // right side, top half
-      [cx + hw, cy + hh * M], [cx + hw, cy + hh * C], // right side, bottom half
-      [cx + hw * C, cy + hh], [cx + hw * M, cy + hh], // bottom, right half
-      [cx - hw * M, cy + hh], [cx - hw * C, cy + hh], // bottom, left half
-      [cx - hw, cy + hh * C], [cx - hw, cy + hh * M], // left side, bottom half
-      [cx - hw, cy - hh * M], [cx - hw, cy - hh * C], // left side, top half
-      [cx - hw * C, cy - hh], [cx - hw * M, cy - hh], // top, left half
-      [cx + hw * M, cy - hh], [cx + hw * C, cy - hh], // top, right half
-    ];
+    const t = this._targetPts;
+    t[0][0]  = cx + hw;     t[0][1]  = cy - hh * C; // right side, top half
+    t[1][0]  = cx + hw;     t[1][1]  = cy - hh * M;
+    t[2][0]  = cx + hw;     t[2][1]  = cy + hh * M; // right side, bottom half
+    t[3][0]  = cx + hw;     t[3][1]  = cy + hh * C;
+    t[4][0]  = cx + hw * C; t[4][1]  = cy + hh;     // bottom, right half
+    t[5][0]  = cx + hw * M; t[5][1]  = cy + hh;
+    t[6][0]  = cx - hw * M; t[6][1]  = cy + hh;     // bottom, left half
+    t[7][0]  = cx - hw * C; t[7][1]  = cy + hh;
+    t[8][0]  = cx - hw;     t[8][1]  = cy + hh * C; // left side, bottom half
+    t[9][0]  = cx - hw;     t[9][1]  = cy + hh * M;
+    t[10][0] = cx - hw;     t[10][1] = cy - hh * M; // left side, top half
+    t[11][0] = cx - hw;     t[11][1] = cy - hh * C;
+    t[12][0] = cx - hw * C; t[12][1] = cy - hh;     // top, left half
+    t[13][0] = cx - hw * M; t[13][1] = cy - hh;
+    t[14][0] = cx + hw * M; t[14][1] = cy - hh;     // top, right half
+    t[15][0] = cx + hw * C; t[15][1] = cy - hh;
+    return t;
   }
 
   // Trace the blob bezier outline onto c. Caller must call beginPath() first
