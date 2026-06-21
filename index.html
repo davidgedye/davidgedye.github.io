@@ -65,13 +65,20 @@ const COVERAGE        = 0.4;
 const REVEAL_INTERVAL = 500;    // ms between successive blob fade-ins
 const FADE_DURATION   = 1000;   // ms for each blob's fade-in
 const TEXTURE_SCALE   = 3.2;    // texture draw diameter as a multiple of baseR
-const R_NOISE_AMP     = 0.15;   // radial wiggle amplitude
-const A_NOISE_AMP     = 0.03;   // angular wiggle amplitude
+const R_NOISE_AMP     = 0.15;   // base per-point wiggle amplitude (scaled by WOBBLE_*_FRAC below)
 const TURN_NOISE_AMP  = 0.45;   // heading drift amplitude
 const MORPH_DURATION  = 1.5;    // seconds to morph open/closed
 const MORPH_INSET     = 0.97;   // rectangle inset factor — keeps clip just inside image edges
 const MORPH_CORNER    = 0.88;   // fraction along each side where corner curve begins
 const MORPH_MID       = 0.35;   // fraction along each side for mid-edge points
+const WOBBLE_IDLE_FRAC     = 1.3; // wiggle strength while floating/unselected — rougher edges
+const WOBBLE_SELECTED_FRAC = 0.4; // wiggle strength once selected/stationary — calmer edges
+const WOBBLE_IDLE_SPEED     = 1.6; // wiggle frequency multiplier while floating — faster waves
+const WOBBLE_SELECTED_SPEED = 1.0; // wiggle frequency multiplier once selected — current pace
+const WOBBLE_CORNER_FRAC   = 0.35; // wiggle damping at corner points — the two points flanking
+                                    // each true corner sit close together and wiggle on different
+                                    // axes (x vs y); full-strength noise lets them cross and folds
+                                    // the curve into a cusp, so corners get a calmer share of it
 
 let projects = [];
 let N = 0;
@@ -148,11 +155,9 @@ class Amoeba {
     this.morphT     = 0;
 
     this.rPhases    = Array.from({ length: P }, () => makePhases(4, R_NOISE_AMP));
-    this.aPhases    = Array.from({ length: P }, () => makePhases(2, A_NOISE_AMP));
     this.turnPhases = makePhases(3, TURN_NOISE_AMP);
 
     this._pts = Array.from({ length: P }, () => [0, 0]);
-    this._targetPts = Array.from({ length: P }, () => [0, 0]);
   }
 
   update(dt) {
@@ -204,64 +209,61 @@ class Amoeba {
     }
   }
 
+  // Blobs are rough rectangles throughout their life: a small one while floating,
+  // growing into a larger one (sized to reveal the full texture) once selected.
+  // The rectangle itself stays fixed; per-point sine noise bows each side in and
+  // out along its perpendicular axis, so it always reads as "rough", never sharp.
   buildPoints(t) {
-    const rx   = this.baseR * Math.sqrt(this.imgAspect);
-    const ry   = this.baseR / Math.sqrt(this.imgAspect);
-    const ease = morphEase(this.morphT);
-    const tPts = this.morphT > 0 ? this._computeTargetPts() : null;
+    const rxIdle = this.baseR * Math.sqrt(this.imgAspect);
+    const ryIdle = this.baseR / Math.sqrt(this.imgAspect);
+    const hwOpen = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
+    const hhOpen = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
+    const ease   = morphEase(this.morphT);
+    const hw     = rxIdle + (hwOpen - rxIdle) * ease;
+    const hh     = ryIdle + (hhOpen - ryIdle) * ease;
+    const wobble = WOBBLE_IDLE_FRAC  + (WOBBLE_SELECTED_FRAC  - WOBBLE_IDLE_FRAC)  * ease;
+    const speed  = WOBBLE_IDLE_SPEED + (WOBBLE_SELECTED_SPEED - WOBBLE_IDLE_SPEED) * ease;
+
+    this._rectPts(hw, hh, this._pts);
 
     for (let i = 0; i < P; i++) {
-      const angle = (i / P) * Math.PI * 2 + sineNoise(this.aPhases[i], t * 0.12);
-      const nr    = 1 + sineNoise(this.rPhases[i], t * 0.18);
-      let px = this.x + Math.cos(angle) * rx * nr;
-      let py = this.y + Math.sin(angle) * ry * nr;
+      const p      = this._pts[i];
+      const corner = i % 4 === 0 || i % 4 === 3;
+      const nAmt   = sineNoise(this.rPhases[i], t * 0.18 * speed) * this.baseR * wobble
+                   * (corner ? WOBBLE_CORNER_FRAC : 1);
+      if (Math.floor(i / 4) % 2 === 0) p[0] += nAmt; // right/left sides: x wiggle
+      else                              p[1] += nAmt; // top/bottom sides: y wiggle
 
-      if (tPts) {
-        px = px + (tPts[i][0] - px) * ease;
-        py = py + (tPts[i][1] - py) * ease;
-
-        // Subtle perpendicular wiggle on mid-edge points when nearly open
-        if (ease > 0.8 && (i % 4 === 1 || i % 4 === 2)) {
-          const blend = (ease - 0.8) / 0.2;
-          const nAmt  = sineNoise(this.rPhases[i], t * 0.05) * this.baseR * 0.06 * blend;
-          if (Math.floor(i / 4) % 2 === 0) px += nAmt; // right/left sides: x wiggle
-          else                              py += nAmt; // top/bottom sides: y wiggle
-        }
-      }
-
-      this._pts[i][0] = Math.max(MARGIN, Math.min(W - MARGIN, px));
-      this._pts[i][1] = Math.max(MARGIN, Math.min(H - MARGIN, py));
+      p[0] = Math.max(MARGIN, Math.min(W - MARGIN, p[0]));
+      p[1] = Math.max(MARGIN, Math.min(H - MARGIN, p[1]));
     }
   }
 
-  // 16 target rectangle points, clockwise from right, matching blob winding order.
-  // Side order: right → bottom → left → top; 4 points per side at 20/40/60/80% of each side.
-  // Writes into the preallocated _targetPts buffer instead of returning a fresh
-  // array — this runs every frame during morph, so allocating here would churn
-  // the GC for the full open/close animation.
-  _computeTargetPts() {
-    const hw = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
-    const hh = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
+  // Fill `out` with 16 rounded-rectangle perimeter points (half-width hw,
+  // half-height hh, centered on this blob), clockwise from right, matching blob
+  // winding order. Side order: right → bottom → left → top; 4 points per side at
+  // 20/40/60/80%. Writes into the caller's preallocated buffer instead of
+  // returning a fresh array — this runs every frame, so allocating here would
+  // churn the GC.
+  _rectPts(hw, hh, out) {
     const cx = this.x, cy = this.y;
     const C = MORPH_CORNER, M = MORPH_MID;
-    const t = this._targetPts;
-    t[0][0]  = cx + hw;     t[0][1]  = cy - hh * C; // right side, top half
-    t[1][0]  = cx + hw;     t[1][1]  = cy - hh * M;
-    t[2][0]  = cx + hw;     t[2][1]  = cy + hh * M; // right side, bottom half
-    t[3][0]  = cx + hw;     t[3][1]  = cy + hh * C;
-    t[4][0]  = cx + hw * C; t[4][1]  = cy + hh;     // bottom, right half
-    t[5][0]  = cx + hw * M; t[5][1]  = cy + hh;
-    t[6][0]  = cx - hw * M; t[6][1]  = cy + hh;     // bottom, left half
-    t[7][0]  = cx - hw * C; t[7][1]  = cy + hh;
-    t[8][0]  = cx - hw;     t[8][1]  = cy + hh * C; // left side, bottom half
-    t[9][0]  = cx - hw;     t[9][1]  = cy + hh * M;
-    t[10][0] = cx - hw;     t[10][1] = cy - hh * M; // left side, top half
-    t[11][0] = cx - hw;     t[11][1] = cy - hh * C;
-    t[12][0] = cx - hw * C; t[12][1] = cy - hh;     // top, left half
-    t[13][0] = cx - hw * M; t[13][1] = cy - hh;
-    t[14][0] = cx + hw * M; t[14][1] = cy - hh;     // top, right half
-    t[15][0] = cx + hw * C; t[15][1] = cy - hh;
-    return t;
+    out[0][0]  = cx + hw;     out[0][1]  = cy - hh * C; // right side, top half
+    out[1][0]  = cx + hw;     out[1][1]  = cy - hh * M;
+    out[2][0]  = cx + hw;     out[2][1]  = cy + hh * M; // right side, bottom half
+    out[3][0]  = cx + hw;     out[3][1]  = cy + hh * C;
+    out[4][0]  = cx + hw * C; out[4][1]  = cy + hh;     // bottom, right half
+    out[5][0]  = cx + hw * M; out[5][1]  = cy + hh;
+    out[6][0]  = cx - hw * M; out[6][1]  = cy + hh;     // bottom, left half
+    out[7][0]  = cx - hw * C; out[7][1]  = cy + hh;
+    out[8][0]  = cx - hw;     out[8][1]  = cy + hh * C; // left side, bottom half
+    out[9][0]  = cx - hw;     out[9][1]  = cy + hh * M;
+    out[10][0] = cx - hw;     out[10][1] = cy - hh * M; // left side, top half
+    out[11][0] = cx - hw;     out[11][1] = cy - hh * C;
+    out[12][0] = cx - hw * C; out[12][1] = cy - hh;     // top, left half
+    out[13][0] = cx - hw * M; out[13][1] = cy - hh;
+    out[14][0] = cx + hw * M; out[14][1] = cy - hh;     // top, right half
+    out[15][0] = cx + hw * C; out[15][1] = cy - hh;
   }
 
   // Trace the blob bezier outline onto c. Caller must call beginPath() first
@@ -447,11 +449,18 @@ let pointerDownX = 0, pointerDownY = 0;
 canvas.addEventListener('pointerdown', e => {
   pointerDownX = e.clientX; pointerDownY = e.clientY;
   tapTarget = null; dragTarget = null;
-  for (const a of amoebas) {
-    if (!a.ready) continue;
-    if (ctx.isPointInPath(a.buildPath2D(), e.clientX * DPR, e.clientY * DPR)) {
-      if (!tapTarget || a.baseR < tapTarget.baseR) tapTarget = a;
-    }
+  const px = e.clientX * DPR, py = e.clientY * DPR;
+
+  // Hit-test topmost-first, mirroring frame()'s draw order: non-idle blobs
+  // (opening/open/closing) render above all idle ones, and among idle blobs,
+  // lower array index renders on top.
+  for (let i = 0; i < amoebas.length && !tapTarget; i++) {
+    const a = amoebas[i];
+    if (a.ready && a.morphState !== 'idle' && ctx.isPointInPath(a.buildPath2D(), px, py)) tapTarget = a;
+  }
+  for (let i = 0; i < amoebas.length && !tapTarget; i++) {
+    const a = amoebas[i];
+    if (a.ready && a.morphState === 'idle' && ctx.isPointInPath(a.buildPath2D(), px, py)) tapTarget = a;
   }
   if (tapTarget) {
     dragTarget  = tapTarget;
