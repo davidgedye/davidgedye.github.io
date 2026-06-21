@@ -149,8 +149,6 @@ class Amoeba {
 
     this.age = Math.random() * 200;
     this.imgAspect = 1;
-    this.imgW = 0;
-    this.imgH = 0;
     this.morphState = 'idle'; // 'idle' | 'opening' | 'open' | 'closing'
     this.morphT     = 0;
 
@@ -214,13 +212,13 @@ class Amoeba {
   // The rectangle itself stays fixed; per-point sine noise bows each side in and
   // out along its perpendicular axis, so it always reads as "rough", never sharp.
   buildPoints(t) {
-    const rxIdle = this.baseR * Math.sqrt(this.imgAspect);
-    const ryIdle = this.baseR / Math.sqrt(this.imgAspect);
+    const hwIdle = this.baseR * Math.sqrt(this.imgAspect);
+    const hhIdle = this.baseR / Math.sqrt(this.imgAspect);
     const hwOpen = this.baseR * TEXTURE_SCALE * Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const hhOpen = this.baseR * TEXTURE_SCALE / Math.sqrt(this.imgAspect) / 2 * MORPH_INSET;
     const ease   = morphEase(this.morphT);
-    const hw     = rxIdle + (hwOpen - rxIdle) * ease;
-    const hh     = ryIdle + (hhOpen - ryIdle) * ease;
+    const hw     = hwIdle + (hwOpen - hwIdle) * ease;
+    const hh     = hhIdle + (hhOpen - hhIdle) * ease;
     const wobble = WOBBLE_IDLE_FRAC  + (WOBBLE_SELECTED_FRAC  - WOBBLE_IDLE_FRAC)  * ease;
     const speed  = WOBBLE_IDLE_SPEED + (WOBBLE_SELECTED_SPEED - WOBBLE_IDLE_SPEED) * ease;
 
@@ -554,8 +552,6 @@ fetch('projects.json')
     amoebas.forEach((a, step) => {
       const img = new Image();
       img.onload = () => {
-        a.imgW = img.naturalWidth;
-        a.imgH = img.naturalHeight;
         a.imgAspect = img.naturalWidth / img.naturalHeight;
         a.texture.width  = img.naturalWidth;
         a.texture.height = img.naturalHeight;
