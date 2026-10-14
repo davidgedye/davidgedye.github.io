@@ -20,13 +20,6 @@
     "imgSize": 1272
   },
   {
-    "title": "Family Photos",
-    "description": "Family and travel photos from 2005 onwards.",
-    "imageUrl": "images/smugmug.jpeg",
-    "siteUrl": "https://gedye.smugmug.com",
-    "imgSize": 1154
-  },
-  {
     "title": "1956 Expedition",
     "description": "An openSeadragon view of John Hoyte's 1956 scrapbook. See [this substack essay](https://gedye.substack.com/p/hannibal-hoyte-and-happenstance) to get a better sense of John's extraordinary character and adventures.",
     "imageUrl": "images/hoyte.jpeg",
